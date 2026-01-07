@@ -1,0 +1,133 @@
+/* --- PAPER BOARD CSS --- */
+
+.paper-board-container {
+  position: relative;
+  aspect-ratio: 16 / 9; 
+  width: 95%;           
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* SHARED STYLE FOR IMG AND VIDEO */
+.paper-frame-img {
+  position: absolute;
+  top: 20px;
+  left: 40px;
+  width: 100%;
+  height: 100%;
+  
+  /* Your custom scaling */
+  scale: 2.2;
+  object-fit: contain; 
+  
+  z-index: 1;
+  pointer-events: none;
+  }
+
+/* HIDES THE STILL IMAGE BEHIND THE VIDEO */
+.paper-frame-img.invisible {
+  opacity: 0;
+}
+
+/* CONTENT OVERLAY */
+.paper-content-overlay {
+  position: relative;
+  z-index: 10;
+  width: 60%;
+  height: 60%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
+}
+
+.paper-content-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* --- PHYSICS ANIMATIONS --- */
+
+.paper-board-container.crumpling {
+  animation: natural-throw 1.5s forwards; 
+}
+
+.paper-board-container.uncrumpling {
+  animation: natural-drop 1.5s forwards;
+}
+
+.paper-board-container.simple-mode.crumpling,
+.paper-board-container.simple-mode.uncrumpling {
+  animation: none !important;
+}
+
+/* --- KEYFRAMES --- */
+
+@keyframes natural-throw {
+  /* STEP 1: WIND UP (0% - 15%) */
+  0% { 
+    transform: translate(0, 0) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+  15% { 
+    /* Ready to launch */
+    transform: translate(0px, 0px) rotate(-5deg) scale(0.98);
+    opacity: 1;
+    
+    /* THE LAUNCH CURVE */
+    /* This curve (0.2, 0.6, 0.4, 1) rounds off the top smoothly */
+    /* but keeps enough speed so it doesn't feel like it stops */
+    animation-timing-function: cubic-bezier(0.2, 0.6, 0.4, 1);
+  }
+  
+  /* STEP 2: THE APEX (45%) */
+  /* Moved to 45% to give it a slightly wider, rounder arc */
+  45% { 
+    /* Go slightly higher (-180px) to exaggerate the curve */
+    transform: translate(-140px, -180px) rotate(-60deg) scale(0.9);
+    opacity: 1; 
+    
+    /* THE GRAVITY CURVE */
+    /* This curve (0.55, 0.05, 0.67, 0.19) grabs it immediately. */
+    /* It prevents the "float" by accelerating down right away. */
+    animation-timing-function: cubic-bezier(0.55, 0.05, 0.67, 0.19);
+  }
+  
+  /* STEP 3: VISIBLE FALL (75%) */
+  75% {
+    transform: translate(-450px, 350px) rotate(-110deg) scale(0.75);
+    opacity: 1; 
+  }
+  
+  /* STEP 4: GONE (100%) */
+  100% { 
+    transform: translate(-600px, 700px) rotate(-140deg) scale(0.6);
+    opacity: 0; 
+  }
+}
+
+@keyframes natural-drop {
+  /* STEP 1: FALLING FROM SKY */
+  0% { 
+    transform: translateY(-900px) rotate(15deg) scale(1.1); 
+    opacity: 1; /* Keep it solid coming in too */
+    animation-timing-function: ease-in; 
+  }
+  
+  /* STEP 2: IMPACT (70%) */
+  70% { 
+    transform: translateY(20px) rotate(-3deg) scale(0.98); 
+    opacity: 1;
+    animation-timing-function: ease-out; 
+  }
+  
+  /* STEP 3: SETTLE (100%) */
+  100% { 
+    transform: translateY(0) rotate(0deg) scale(1); 
+    opacity: 1;
+  }
+}
