@@ -1,6 +1,6 @@
 .anim-toggle-container {
   position: fixed;
-  top: 80px; /* Sits below the Theme Toggle */
+  top: 80px; 
   right: 20px;
   z-index: 9999;
   
@@ -8,11 +8,10 @@
   align-items: center;
   gap: 8px;
   
-  /* Doodle Card Style */
-  background-color: var(--paper); /* Ensures readability over grid */
+  background-color: var(--paper); 
   padding: 8px 12px;
   border: 2px solid var(--ink);
-  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px; /* Wobble shape */
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px; 
   box-shadow: 2px 2px 0px rgba(0,0,0,0.1);
   
   user-select: none;
@@ -24,7 +23,6 @@
   transform: scale(0.98);
 }
 
-/* The Checkbox Input */
 .anim-checkbox {
   appearance: none;
   width: 20px;
@@ -37,12 +35,10 @@
   margin: 0;
 }
 
-/* Checked State (Banana Yellow Fill) */
 .anim-checkbox:checked {
   background-color: var(--banana);
 }
 
-/* Doodle Checkmark pseudo-element */
 .anim-checkbox:checked::after {
   content: '✔';
   position: absolute;
@@ -69,18 +65,12 @@
   100% { transform: rotate(0deg) scale(1.02); }
 }
 
-/* 2. APPLY ON HOVER */
 .anim-toggle-container:hover {
-  /* Play the wiggle once, quickly */
   animation: wiggle 0.6s ease-in-out;
-  /* Keep it slightly larger while hovering */
-  transform: scale(1.02);
-  /* Change border color to show interaction */
-   
+  transform: scale(1.02);   
   background-color: #fffef0;
 }
 
-/* 3. KEEP ACTIVE CLICK (Make sure this is below hover) */
 .anim-toggle-container:active {
   transform: scale(0.95);
   transition: 0.1s;

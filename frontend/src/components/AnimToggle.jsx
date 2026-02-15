@@ -5,13 +5,13 @@ export default function AnimToggle({ showAnimations, toggleAnimations }) {
   return (
     <div 
       className="anim-toggle-container" 
-      onClick={toggleAnimations} // Clicking the whole box toggles it
+      onClick={toggleAnimations} 
     >
       <input 
         type="checkbox" 
         className="anim-checkbox"
         checked={showAnimations}
-        readOnly // React handles the click via the parent div
+        readOnly 
       />
       <span className="anim-label">Animations</span>
     </div>

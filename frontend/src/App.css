@@ -33,9 +33,9 @@ html, body{
 }
 
 body.dark-mode {
-  --bg-color: #121212;   /* Deep Charcoal/Black */
-  --grid-line: rgba(250, 245, 231, 0.1);   /* Dim gray grid lines */
-  --monkey-stroke: #FAF5E7; /* Monkeys turn White/Cream */
+  --bg-color: #121212;   
+  --grid-line: rgba(250, 245, 231, 0.1);   
+  --monkey-stroke: #FAF5E7; 
 }
 
 body {
@@ -48,25 +48,24 @@ body {
   display: flex;
   justify-content: center;
   min-height: 100vh;
-  overflow-x: hidden; /* Prevent scrollbars during animation */
+  overflow-x: hidden; 
   font-family: 'Mandys Sketch', cursive;
   transition: background-color 0.5s ease;
 }
 
 input::placeholder, textarea::placeholder {
-  color: #333;       /* Dark Charcoal */
-  opacity: 1;      /* Slight transparency so it looks like a hint */
-  font-weight: bold; /* Make it thicker */
+  color: #333;      
+  opacity: 1;      
+  font-weight: bold;
 }
 
-/* Optional: When clicking, make it lighter */
 input:focus::placeholder {
   opacity: 0.7;
 }
 
 .app-container {
   width: 100%;
-  max-width: 1200px; /* PC Max Width */
+  max-width: 1200px; 
   padding: 20px;
   text-align: center;
   display: flex;
@@ -75,7 +74,6 @@ input:focus::placeholder {
   justify-content: center;
 }
 
-/* --- ANIMATIONS --- */
 
 
 @keyframes crumble-out {
@@ -83,28 +81,23 @@ input:focus::placeholder {
     transform: scale(1) rotate(0deg) translate(0,0);
     opacity: 1; 
   }
-  /* Squeeze: Distort the shape */
   20% { 
     transform: scale(0.95) skewX(15deg) rotate(2deg); 
   }
-  /* Crunch: Shrink and fold opposite way */
   40% { 
     transform: scale(0.7) skewY(-20deg) rotate(-5deg); 
     opacity: 0.9;
   }
-  /* Ball: Compact it down */
   60% { 
     transform: scale(0.4) rotate(15deg) skewX(10deg); 
     opacity: 0.8;
   }
-  /* Throw: Drop it off screen */
   100% { 
     transform: scale(0.2) rotate(45deg) translateY(1000px); 
     opacity: 0; 
   }
 }
 
-/* 2. New paper slides in from the top */
 @keyframes paper-slide-in {
   0% { transform: translateY(-800px) rotate(-5deg); opacity: 0; }
   70% { transform: translateY(20px) rotate(2deg); opacity: 1; }
@@ -120,7 +113,6 @@ input:focus::placeholder {
 }
 
 .tail-idle {
-  /* Anchor rotation to the connection point (25, 60) */
   transform-origin: 25px 60px;
   animation: tail-sway 1.5s ease infinite;
 }
@@ -131,10 +123,9 @@ input:focus::placeholder {
 
 .page-exit {
   animation: crumble-out 0.6s ease-in forwards;
-  pointer-events: none; /* Prevent clicking while falling */
+  pointer-events: none; 
 }
 
-/* --- TEXT STYLES --- */
 h1.title {
   font-size: 3.5rem;
   transform: rotate(-3deg);
@@ -151,15 +142,35 @@ h1.title {
   display: inline-block;
 }
 
-/* --- CONTAINERS --- */
-.title-img{
+.title-img {
   width: 700px;
   margin-top: -50px;
   margin-bottom: -70px;
   padding: 0;
+  z-index: 10; 
+  position: relative;
+  transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.5s ease;
 }
 
-/* --- RESPONSIVE (MOBILE) --- */
+.title-img.hidden {
+  transform: translateY(-400px) rotate(-10deg);
+  opacity: 0; 
+  pointer-events: none; 
+}
+
+.paper-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.paper-wrapper.expanded {
+  transform: scale(1.2) translateY(-50px);
+  backface-visibility: hidden;
+  -webkit-font-smoothing: subpixel-antialiased;
+}
+
 @media (max-width: 600px) {
   .app-container {
     padding: 10px;
@@ -169,7 +180,7 @@ h1.title {
   h1.title { font-size: 2.5rem; }
 
   .btn-doodle {
-    width: 100%; /* Full width buttons on mobile */
+    width: 100%; 
     margin: 10px 0;
     font-size: 1.1rem;
   }
@@ -177,48 +188,107 @@ h1.title {
   input { width: 90%; }
 }
 
-/* --- INPUTS --- */
-input, textarea{
+input, textarea {
   font-family: 'First Time Writing', cursive;
-  font-weight: bold;
+  font-weight: 900; 
+  color: var(--ink);
 }
+
 input {
   display: block;
   width: 80%;
   margin: 15px auto;
   padding: 12px;
-  font-size: 1.4rem;
+  font-size: 1.6rem; 
   background: transparent;
   border: none;
-  border-bottom: 3px solid var(--ink);
   outline: none;
   text-align: center;
+  
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='10' viewBox='0 0 200 10' preserveAspectRatio='none'><path d='M0 5 Q 50 10 100 5 T 200 5' stroke='%231a1a1a' stroke-width='4' fill='none'/></svg>");
+  background-repeat: no-repeat;
+  background-position: bottom center;
+  background-size: 100% 10px; 
+  
+  transition: transform 0.2s;
 }
-input:focus { border-bottom: 3px solid var(--activeborder); transform: scale(1.02); }
+.switch__input{
+  background: none;
+}
 
-/* --- BUTTONS --- */
-button{
-  font-family: 'Mandys Sketch', cursive;
+input:focus { 
+  transform: scale(1.02);
 }
+
+input::placeholder {
+  color: var(--ink);
+  opacity: 1;
+  font-weight: bolder;
+}
+
+button {
+  font-family: 'Mandys Sketch', cursive;
+  font-weight: bold;
+}
+
+button {
+  font-family: 'Mandys Sketch', cursive;
+  font-weight: bold;
+}
+
 .btn-doodle {
-  background: var(--banana);
-  border: 2px solid var(--ink);
-  border-radius: var(--border-wobble);
-  padding: 12px 30px;
-  font-size: 1.4rem;
+  background-color: rgba(0, 0, 0, 0.664); 
+  border: 3px solid black;
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  box-shadow: none;
+
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 70' preserveAspectRatio='none'%3E%3Cpath d='M8,30 C40,15 120,10 180,12 C240,14 280,5 292,20 C298,28 290,50 280,55 C200,60 100,55 20,52 C10,50 -5,40 8,30 Z' fill='%231a1a1a'/%3E");
+  
+  background-size: 100% 100%; 
+  background-repeat: no-repeat;
+  background-position: center;
+
+  
+  color: var(--paper); 
+  padding: 5px 10px; 
+  font-size: 1.5rem;
+  font-weight: bold;
   cursor: pointer;
   margin: 10px;
-  box-shadow: 3px 3px 0px var(--ink);
-  transition: 0.1s;
-  user-select: none;
+  
+  transform: rotate(-1deg);
+  transition: transform 0.2s, filter 0.2s;
+  
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
-.btn-doodle:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0px var(--ink); background: #fff08a; }
-.btn-doodle:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0px var(--ink); }
-.btn-secondary { background: white; }
-.btn-leave { background: var(--red); color: white; font-size: 1rem; width: auto; }
-.btn-link { background: #eee; font-size: 1rem; padding: 5px 15px; }
 
-/* --- GAME ELEMENTS --- */
+.btn-doodle:hover {
+  transform: scale(1.05) rotate(1deg);
+  background-color: black; 
+}
+
+.btn-doodle:active {
+  transform: scale(0.95);
+}
+
+.btn-secondary {
+  background-image: none; 
+  background-color: rgba(255, 255, 255, 0.5); 
+  
+  color: var(--ink);
+  
+  border: 3px solid var(--ink);
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+}
+
+.btn-secondary:hover {
+  background-color: white;
+  transform: scale(1.05) rotate(2deg);
+  filter: none;
+}
+
 .avatar-circle {
   width: 45px; height: 45px;
   border: 2px solid var(--ink); border-radius: 50%;
@@ -244,7 +314,6 @@ button{
 .vote-card:hover { background: #f9f9f9; border-color: var(--activeborder); transform: rotate(-1deg); }
 
 
-/* --- DOODLE MONKEY STYLES --- */
 
 @keyframes scribble-jitter {
   0% { transform: rotate(0deg) translate(0,0); }
@@ -266,7 +335,6 @@ button{
 .monkey-svg {
   width: 100%;
   height: 100%;
-  /* Slower time (0.5s) and steps(3) makes it look like a 12fps cartoon */
   animation: scribble-jitter 0.5s infinite steps(3); 
   overflow: visible;
 }

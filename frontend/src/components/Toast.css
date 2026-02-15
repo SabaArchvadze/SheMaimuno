@@ -1,0 +1,59 @@
+.toast-container {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10000;
+  pointer-events: none; 
+  
+  display: flex;
+  justify-content: center;
+  width: 90%;
+  max-width: 400px;
+}
+
+.toast-box {
+  background-color: rgba(255, 255, 255, 0.95);
+  border: 3px solid var(--ink);
+  
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  box-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+  
+  padding: 15px 25px;
+  text-align: center;
+  font-family: 'Mandys Sketch', cursive;
+  font-size: 1.2rem;
+  font-weight: bold;
+  
+  animation: toast-enter 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  opacity: 0;
+}
+
+.toast-box.error {
+  color: var(--red);
+  border-color: var(--red);
+}
+
+.toast-box.success {
+  color: #2ecc71;
+  border-color: #2ecc71;
+}
+
+.toast-box.info {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+.toast-box.toast-exit {
+  animation: toast-exit 0.5s ease forwards;
+}
+
+@keyframes toast-enter {
+  0% { transform: translateY(30px) scale(0.9); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+@keyframes toast-exit {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(20px) scale(0.95); opacity: 0; }
+}

@@ -1,9 +1,8 @@
-/* SCOPED VARIABLES */
 .doodle-switch {
   --switch-width: 60px;
   --switch-height: 32px;
   --border-thickness: 3px;
-  --knob-size: 20px; /* Smaller than height to fit inside */
+  --knob-size: 20px; 
   
   --trans-dur: 0.3s;
   
@@ -14,7 +13,6 @@
   cursor: pointer;
 }
 
-/* HIDE DEFAULT CHECKBOX */
 .switch__input {
   appearance: none;
   -webkit-appearance: none;
@@ -24,44 +22,35 @@
   width: var(--switch-width);
   height: var(--switch-height);
   
-  /* DOODLE STYLE BASE */
-  background-color: #87CEEB; /* Sky Blue */
-  border: var(--border-thickness) solid var(--ink); /* Thick Border */
+  background-color: #87CEEB; 
+  border: var(--border-thickness) solid var(--ink); 
   border-radius: 99px;
   
   box-shadow: 3px 3px 0px rgba(0,0,0,0.2);
   transition: background-color var(--trans-dur);
   cursor: pointer;
   
-  /* Ensure padding doesn't mess up size */
   box-sizing: border-box; 
 }
 
 .switch__input:hover {
-  /* Play the wiggle once, quickly */
   animation: wiggle 0.6s ease-in-out;
-  /* Keep it slightly larger while hovering */
   transform: scale(1.02);
 }
 
-/* CLICK PRESS EFFECT */
 .switch__input:active {
   transform: translate(1px, 1px);
   box-shadow: 1px 1px 0px rgba(0,0,0,0.2);
 }
 
-/* --- THE KNOB (Sun/Moon Circle) --- */
 .switch__input:after {
   content: "";
   display: block;
   position: absolute;
   
-  /* VERTICAL CENTERING LOGIC */
-  /* (Height - Border*2 - Knob) / 2 */
-  /* (32 - 6 - 20) / 2 = 3px from top of inner content */
   top: 50%;
   transform: translateY(-50%); 
-  left: 4px; /* Push it away from the left border */
+  left: 4px; 
   
   width: var(--knob-size);
   height: var(--knob-size);
@@ -74,15 +63,12 @@
   z-index: 2;
 }
 
-/* --- CHECKED STATE (NIGHT MODE) --- */
 .switch__input:checked {
-  background-color: #2c2c54; /* Navy */
+  background-color: #2c2c54; 
 }
 
 .switch__input:checked:after {
   background-color: #f5f6fa;
-  /* Move Right: Width - Knob - LeftPad*2 - Border*2 */
-  /* Or just hardcode the distance for simplicity */
   transform: translate(26px, -50%); 
 }
 

@@ -1,57 +1,81 @@
-const questionList = require('../questions'); // Move this import here
+const questionList = require('../questions');
 
 const getRandomQuestion = () => {
+    if (!questionList || questionList.length === 0) return null;
     return questionList[Math.floor(Math.random() * questionList.length)];
 };
 
-
 const startGame = (io, socket, rooms, roomCode) => {
     const room = rooms[roomCode];
-    if (!room) return;
+    if (!room || room.players.length < 2) return; 
 
     room.gameState = 'WRITING';
     room.answers = [];
     room.votes = {};
 
     const impostorIndex = Math.floor(Math.random() * room.players.length);
-    room.impostorId = room.players[impostorIndex].id; // No typo here!
+    room.impostorId = room.players[impostorIndex].id;
 
     const qPair = getRandomQuestion();
-    room.currentPair = qPair;
-    room.currentQuestion = qPair.normal;
+    if (!qPair) {
+        room.currentPair = { normal: "Error", impostor: "Error" };
+    } else {
+        room.currentPair = qPair;
+    }
+    room.currentQuestion = room.currentPair.normal;
 
     room.players.forEach(p => {
         const isImpostor = p.id === room.impostorId;
-        const text = isImpostor ? qPair.impostor : qPair.normal;
         io.to(p.socketId).emit('roundStart', {
             role: isImpostor ? 'IMPOSTOR' : 'NORMAL',
-            question: text
+            question: isImpostor ? room.currentPair.impostor : room.currentPair.normal
         });
     });
+    
+    io.to(roomCode).emit('updateGameState', 'WRITING');
 };
 
 const submitAnswer = (io, socket, rooms, { roomCode, playerId, answer }) => {
     const room = rooms[roomCode];
-    if (!room) return;
+    if (!room || room.gameState !== 'WRITING') return;
 
     const player = room.players.find(p => p.id === playerId);
-    if (!room.answers.find(a => a.playerId === playerId)) {
+    if (!player) return;
+
+    const existingIndex = room.answers.findIndex(a => a.playerId === playerId);
+    if (existingIndex !== -1) {
+        room.answers[existingIndex].text = answer;
+    } else {
         room.answers.push({ playerId, name: player.name, text: answer, avatar: player.avatar });
     }
 
-    if (room.answers.length === room.players.length) {
+    io.to(roomCode).emit('updateAnswerCount', room.answers.map(a => a.playerId));
+
+    if (room.answers.length >= room.players.length) {
         room.gameState = 'VOTING';
         io.to(roomCode).emit('startVoting', room.answers);
     }
 };
 
-const submitVote = (io, socket, rooms, { roomCode, voterId, targetId }) => {
+const retractAnswer = (io, socket, rooms, { roomCode, playerId }) => {
     const room = rooms[roomCode];
     if (!room) return;
+    
+    room.answers = room.answers.filter(a => a.playerId !== playerId);
+    io.to(roomCode).emit('updateAnswerCount', room.answers.map(a => a.playerId));
+};
+
+const submitVote = (io, socket, rooms, { roomCode, voterId, targetId }) => {
+    const room = rooms[roomCode];
+    if (!room || room.gameState !== 'VOTING') return;
 
     room.votes[voterId] = targetId;
 
-    if (Object.keys(room.votes).length === room.players.length) {
+    const currentPlayerIds = room.players.map(p => p.id);
+    
+    const validVotes = Object.keys(room.votes).filter(id => currentPlayerIds.includes(id));
+
+    if (validVotes.length >= room.players.length) {
         const voteCounts = {};
         Object.values(room.votes).forEach(target => {
             voteCounts[target] = (voteCounts[target] || 0) + 1;
@@ -67,7 +91,8 @@ const submitVote = (io, socket, rooms, { roomCode, voterId, targetId }) => {
         }
 
         const impostorCaught = mostSusId === room.impostorId;
-        const impostorName = room.players.find(p => p.id === room.impostorId).name;
+        const impObj = room.players.find(p => p.id === room.impostorId);
+        const impostorName = impObj ? impObj.name : "Unknown";
 
         io.to(roomCode).emit('gameOver', {
             impostorCaught,
@@ -78,4 +103,4 @@ const submitVote = (io, socket, rooms, { roomCode, voterId, targetId }) => {
     }
 };
 
-module.exports = { startGame, submitAnswer, submitVote };
+module.exports = { startGame, submitAnswer, submitVote, retractAnswer };
