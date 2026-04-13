@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import '../App.css';
 import './PaperBoard.css';
 
@@ -16,6 +16,15 @@ export default function PaperBoard({ children, view, showAnimations }) {
   const [videoKey, setVideoKey] = useState(0);
 
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const latestViewRef = useRef(view);
+  const latestChildrenRef = useRef(children);
+  const crumbleTimerRef = useRef(null);
+  const uncrumpleTimerRef = useRef(null);
+
+  useEffect(() => {
+    latestViewRef.current = view;
+    latestChildrenRef.current = children;
+  }, [view, children]);
 
   useEffect(() => {
     if (view !== displayedView && animState === 'STATIC') {
@@ -25,21 +34,33 @@ export default function PaperBoard({ children, view, showAnimations }) {
     }
   }, [view, displayedView, animState, children]);
 
+  useEffect(() => {
+    return () => {
+      if (crumbleTimerRef.current) clearTimeout(crumbleTimerRef.current);
+      if (uncrumpleTimerRef.current) clearTimeout(uncrumpleTimerRef.current);
+    };
+  }, []);
+
   const startCrumpleSequence = () => {
+    if (crumbleTimerRef.current) clearTimeout(crumbleTimerRef.current);
+    if (uncrumpleTimerRef.current) clearTimeout(uncrumpleTimerRef.current);
+
     setIsVideoPlaying(false);
     setAnimState('CRUMPLING');
     setVideoKey(prev => prev + 1);
 
-    setTimeout(() => {
-      setDisplayedView(view);
-      setDisplayContent(children);
+    crumbleTimerRef.current = setTimeout(() => {
+      setDisplayedView(latestViewRef.current);
+      setDisplayContent(latestChildrenRef.current);
       
       setAnimState('UNCRUMPLING');
       setVideoKey(prev => prev + 1);
 
-      setTimeout(() => {
+      uncrumpleTimerRef.current = setTimeout(() => {
         setAnimState('STATIC');
         setIsVideoPlaying(false);
+        setDisplayedView(latestViewRef.current);
+        setDisplayContent(latestChildrenRef.current);
       }, DURATION); 
 
     }, DURATION); 

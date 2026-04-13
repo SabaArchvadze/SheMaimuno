@@ -28,6 +28,7 @@ html, body{
   --ink: #1a1a1a;
   --banana: #FFE135;
   --red: #eb4d4b;
+  --leaf: #2e9e48;
   --border-wobble: 255px 15px 225px 15px / 15px 225px 15px 255px;
   --activeborder: rgb(58, 57, 57);
 }
@@ -289,6 +290,41 @@ button {
   filter: none;
 }
 
+.btn-link {
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--ink);
+  font-size: 1rem;
+  padding: 6px 14px;
+  margin: 4px 0 14px;
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.btn-link:hover {
+  transform: translateY(-1px) rotate(-1deg);
+  background: #fff;
+}
+
+.leave-game-btn {
+  position: absolute;
+  top: -52px;
+  left: -54px;
+  cursor: pointer;
+  z-index: 120;
+  opacity: 0.6;
+  transition: 0.2s;
+  background: rgba(255, 255, 255, 0.75);
+  border: 2px dashed var(--ink);
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .avatar-circle {
   width: 45px; height: 45px;
   border: 2px solid var(--ink); border-radius: 50%;
@@ -313,13 +349,69 @@ button {
 }
 .vote-card:hover { background: #f9f9f9; border-color: var(--activeborder); transform: rotate(-1deg); }
 
+.vote-side-drawer {
+  position: fixed;
+  top: 200px;
+  right: 0;
+  width: 230px;
+  max-height: calc(100vh - 160px);
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px dashed var(--ink);
+  border-right: none;
+  border-radius: 14px 0 0 14px;
+  padding: 10px 10px 10px 12px;
+  text-align: left;
+  transform: translateX(105%);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.55s ease, opacity 0.45s ease;
+  z-index: 9998;
+}
 
+.vote-side-drawer.visible {
+  transform: translateX(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.vote-side-drawer h3 {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+  text-align: center;
+}
+
+.vote-side-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px dashed rgba(0, 0, 0, 0.25);
+  padding: 6px 2px;
+  font-size: 0.95rem;
+  gap: 10px;
+}
+
+.vote-side-row:first-of-type {
+  border-top: none;
+}
+
+.vote-side-row span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 @keyframes scribble-jitter {
   0% { transform: rotate(0deg) translate(0,0); }
   33% { transform: rotate(0.5deg) translate(1px, 0); }
   66% { transform: rotate(-0.5deg) translate(0, 1px); }
   100% { transform: rotate(0deg) translate(0,0); }
+}
+
+@media (max-width: 900px) {
+  .vote-side-drawer {
+    display: none;
+  }
 }
 
 .monkey-wrapper {

@@ -9,14 +9,13 @@ import ThemeToggle from './components/ThemeToggle';
 import AnimToggle from './components/AnimToggle';
 import Toast from './components/Toast';
 
-const socket = io('http://localhost:3001');
+const socket = io(process.env.REACT_APP_SOCKET_URL || 'http://localhost:3001');
 const MONKEYS = ['🐵', '🙉', '🙊', '🐒'];
 
 function GameApp() {
   const { roomCode: urlRoomCode } = useParams(); 
   const navigate = useNavigate();
 
-  // --- STATE ---
   const [view, setView] = useState('HOME');
   const [isExiting, setIsExiting] = useState(false); 
 
@@ -28,7 +27,6 @@ function GameApp() {
 
   const [toast, setToast] = useState({ message: '', type: '' });
 
-  // Game Data
   const [myRole, setMyRole] = useState('');
   const [question, setQuestion] = useState('');
   const [myAnswer, setMyAnswer] = useState('');
@@ -41,8 +39,8 @@ function GameApp() {
 
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [submittedCount, setSubmittedCount] = useState(0);
+  const [lastVoteBreakdown, setLastVoteBreakdown] = useState([]);
 
-  // --- ANIMATED VIEW CHANGER ---
   const changeView = (newView) => {
     if (view === newView) return;
     setIsExiting(true);
@@ -56,8 +54,6 @@ function GameApp() {
   const showToast = (msg, type = 'info') => {
     setToast({ message: msg, type });
   };
-
-  // --- EFFECTS ---
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('sm_theme');
@@ -106,8 +102,13 @@ function GameApp() {
           }
           else if (res.gameState === 'WRITING') {
             if (res.hasSubmitted) {
+              setHasSubmitted(true);
+              if (typeof res.submittedCount === 'number') {
+                setSubmittedCount(res.submittedCount);
+              }
               setView('WAITING');
             } else {
+              setHasSubmitted(false);
               setView('GAME');
             }
             if (res.roundInfo) {
@@ -130,7 +131,10 @@ function GameApp() {
       });
     }
 
-    socket.on('updatePlayers', (list) => setPlayers(list));
+    socket.on('updatePlayers', (list) => {
+      setPlayers(list);
+      setAllAnswers(prev => prev.filter(ans => list.some(p => p.id === ans.playerId)));
+    });
     socket.on('roundStart', ({ role, question }) => {
       setMyRole(role);
       setQuestion(question);
@@ -147,6 +151,9 @@ function GameApp() {
     });
     socket.on('gameOver', (res) => {
       setResult(res);
+      if (Array.isArray(res.voteBreakdown)) {
+        setLastVoteBreakdown(res.voteBreakdown);
+      }
       changeView('RESULT');
     });
     socket.on('updateAnswerCount', (submittedIds) => {
@@ -171,6 +178,11 @@ function GameApp() {
     };
   }, [urlRoomCode]);
 
+  useEffect(() => {
+    const me = players.find(p => p.id === playerId);
+    setIsHost(!!(me && me.isHost));
+  }, [players, playerId]);
+
 
   const toggleTheme = () => {
     const newMode = !isDarkMode;
@@ -188,6 +200,9 @@ function GameApp() {
   const handleEdit = () => {
     setHasSubmitted(false); 
     socket.emit('retractAnswer', { roomCode, playerId });
+    if (view === 'WAITING') {
+      changeView('GAME');
+    }
   };
 
   const toggleAnimations = () => {
@@ -270,10 +285,9 @@ function GameApp() {
   const copyInvite = () => {
     const url = window.location.href;
     navigator.clipboard.writeText(url);
-    showToast('Link copied! Send it to a monkey.', 'success')
+    showToast('Link copied to clipboard!', 'success')
   };
 
-  // --- RENDER ---
   return (
     <div className="app-container">
 
@@ -282,6 +296,15 @@ function GameApp() {
         showAnimations={showAnimations}
         toggleAnimations={toggleAnimations}
       />
+      <aside className={`vote-side-drawer ${view === 'RESULT' && lastVoteBreakdown.length > 0 ? 'visible' : ''}`}>
+        <h3>ხმების შედეგები</h3>
+        {lastVoteBreakdown.map((entry) => (
+          <div key={entry.playerId} className="vote-side-row">
+            <span>{entry.name}</span>
+            <span>{entry.votes} ხმა</span>
+          </div>
+        ))}
+      </aside>
 
       <img
         src={titleImage}
@@ -319,15 +342,7 @@ function GameApp() {
           {view !== 'HOME' && (
             <div
               onClick={leaveGame}
-              style={{
-                position: 'absolute',
-                top: '15px',
-                left: '15px',
-                cursor: 'pointer',
-                zIndex: 100,
-                opacity: 0.6,
-                transition: '0.2s'
-              }}
+              className="leave-game-btn"
               onMouseEnter={e => e.currentTarget.style.opacity = 1}
               onMouseLeave={e => e.currentTarget.style.opacity = 0.6}
               title="Leave Game"
@@ -420,6 +435,19 @@ function GameApp() {
                   </button>
                 </div>
               )}
+            </>
+          )}
+
+          {view === 'WAITING' && (
+            <>
+              <h2>პასუხი მიღებულია! 🍌</h2>
+              <p>დაელოდე სანამ ყველა დაასრულებს პასუხის დაწერას...</p>
+              <div style={{ marginTop: '20px', fontSize: '1.1rem', opacity: 0.8 }}>
+                {submittedCount}/{players.length} მზადაა
+              </div>
+              <button className="btn-doodle btn-secondary" style={{ marginTop: '16px' }} onClick={handleEdit}>
+                პასუხის ჩასწორება
+              </button>
             </>
           )}
 

@@ -8,6 +8,7 @@ const { startGame, submitAnswer, submitVote, retractAnswer } = require('./handle
 
 const app = express();
 app.use(cors());
+const PORT = process.env.PORT || 3001;
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -16,6 +17,8 @@ const io = new Server(server, {
 
 let rooms = {};
 let socketToRoom = {}; 
+const pendingDisconnects = {};
+const RECONNECT_GRACE_MS = 15000;
 
 io.on('connection', (socket) => {
 
@@ -40,12 +43,22 @@ io.on('connection', (socket) => {
 
     socket.on('reconnect', (data, cb) => {
         reconnect(io, socket, rooms, data, (res) => {
-            if (res.success) registerSocket(socket.id, res.roomCode);
+            if (res.success) {
+                registerSocket(socket.id, res.roomCode);
+                if (pendingDisconnects[data.playerId]) {
+                    clearTimeout(pendingDisconnects[data.playerId]);
+                    delete pendingDisconnects[data.playerId];
+                }
+            }
             cb(res);
         });
     });
 
     socket.on('leaveRoom', (data) => {
+        if (data && data.playerId && pendingDisconnects[data.playerId]) {
+            clearTimeout(pendingDisconnects[data.playerId]);
+            delete pendingDisconnects[data.playerId];
+        }
         leaveRoom(io, socket, rooms, data);
         delete socketToRoom[socket.id];
     });
@@ -59,15 +72,30 @@ io.on('connection', (socket) => {
             
             if (player) {
                 console.log(`[Disconnect] ${player.name} left ${roomCode}`);
-                
-                const result = removePlayerFromRoom(io, room, player.id);
-                
-                if (result === 'EMPTY') {
-                    delete rooms[roomCode];
-                    console.log(`[Room Deleted] ${roomCode} is empty`);
-                } else {
-                    io.to(roomCode).emit('updatePlayers', room.players);
+                const disconnectedSocketId = socket.id;
+
+                if (pendingDisconnects[player.id]) {
+                    clearTimeout(pendingDisconnects[player.id]);
                 }
+
+                pendingDisconnects[player.id] = setTimeout(() => {
+                    const latestRoom = rooms[roomCode];
+                    if (!latestRoom) return;
+
+                    const latestPlayer = latestRoom.players.find(p => p.id === player.id);
+                    if (!latestPlayer || latestPlayer.socketId !== disconnectedSocketId) return;
+
+                    const result = removePlayerFromRoom(io, latestRoom, player.id);
+
+                    if (result === 'EMPTY') {
+                        delete rooms[roomCode];
+                        console.log(`[Room Deleted] ${roomCode} is empty`);
+                    } else {
+                        io.to(roomCode).emit('updatePlayers', latestRoom.players);
+                    }
+
+                    delete pendingDisconnects[player.id];
+                }, RECONNECT_GRACE_MS);
             }
         }
         
@@ -84,4 +112,4 @@ io.on('connection', (socket) => {
     socket.on('submitVote', (data) => submitVote(io, socket, rooms, data));
 });
 
-server.listen(3001, () => console.log('She Maimuno Server Stable v2.0 Running'));
+server.listen(PORT, () => console.log(`She Maimuno Server Stable v2.0 Running on ${PORT}`));

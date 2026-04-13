@@ -1,39 +1,11 @@
 const { v4: uuidv4 } = require('uuid');
+const { resolveVotingResult, buildVoteBreakdown } = require('./voteResolution');
 
-const checkVotingResult = (io, room) => {
-    const currentIds = room.players.map(p => p.id);
-    
-    const validVotes = Object.keys(room.votes).filter(id => currentIds.includes(id));
-    
-    if (validVotes.length >= room.players.length) {
-        
-        const voteCounts = {};
-        Object.values(room.votes).forEach(targetId => {
-            voteCounts[targetId] = (voteCounts[targetId] || 0) + 1;
-        });
-
-        let maxVotes = 0;
-        let mostSusId = null;
-        for (const [pid, count] of Object.entries(voteCounts)) {
-            if (count > maxVotes) {
-                maxVotes = count;
-                mostSusId = pid;
-            }
-        }
-
-        const impostorCaught = mostSusId === room.impostorId;
-        
-        const impostorObj = room.players.find(p => p.id === room.impostorId);
-        const impostorName = impostorObj ? impostorObj.name : "The Impostor (Left)";
-
-        io.to(room.code).emit('gameOver', {
-            impostorCaught,
-            impostorName,
-            realQuestion: room.currentQuestion
-        });
-        room.gameState = 'RESULT';
-    }
-};
+const buildLeaderboard = (room) => (
+    room.players
+        .map(p => ({ name: p.name, score: p.score, avatar: p.avatar, isImpostor: p.id === room.impostorId }))
+        .sort((a, b) => b.score - a.score)
+);
 
 
 
@@ -103,7 +75,10 @@ const reconnect = (io, socket, rooms, { roomCode, playerId }, callback) => {
     const player = room.players.find(p => p.id === playerId);
     if (!player) return callback({ success: false, error: "Player not found" });
 
-    player.socketId = socket.id;
+    const previousSocketAlive = player.socketId && io.sockets.sockets.get(player.socketId);
+    if (!previousSocketAlive) {
+        player.socketId = socket.id;
+    }
     socket.join(roomCode);
     io.to(roomCode).emit('updatePlayers', room.players);
 
@@ -118,6 +93,7 @@ const reconnect = (io, socket, rooms, { roomCode, playerId }, callback) => {
         gameState: room.gameState,
         players: room.players,
         hasSubmitted: room.answers.some(a => a.playerId === playerId),
+        submittedCount: room.answers.length,
         roundInfo: room.gameState !== 'LOBBY' ? {
             question: player.id === room.impostorId ? room.currentPair.impostor : room.currentPair.normal,
             role: player.id === room.impostorId ? 'IMPOSTOR' : 'NORMAL'
@@ -146,7 +122,10 @@ const removePlayerFromRoom = (io, room, playerId) => {
             io.to(room.code).emit('gameOver', {
                 impostorCaught: true,
                 impostorName: `${playerToRemove.name} (Ran Away)`,
-                realQuestion: room.currentQuestion
+                realQuestion: room.currentQuestion,
+                outcome: "CAUGHT",
+                leaderboard: buildLeaderboard(room),
+                voteBreakdown: buildVoteBreakdown(room)
             });
             room.gameState = 'RESULT';
             return 'UPDATED';
@@ -163,8 +142,15 @@ const removePlayerFromRoom = (io, room, playerId) => {
         } 
         else if (room.gameState === 'VOTING') {
             delete room.votes[playerId];
+            room.answers = room.answers.filter(a => a.playerId !== playerId);
+            Object.keys(room.votes).forEach(voterId => {
+                if (room.votes[voterId] === playerId) {
+                    delete room.votes[voterId];
+                }
+            });
+            io.to(room.code).emit('startVoting', room.answers);
             
-            checkVotingResult(io, room);
+            resolveVotingResult(io, room);
         }
     }
 
@@ -174,6 +160,8 @@ const removePlayerFromRoom = (io, room, playerId) => {
 const leaveRoom = (io, socket, rooms, { roomCode, playerId }) => {
     const room = rooms[roomCode];
     if (room) {
+        const player = room.players.find(p => p.id === playerId);
+        if (!player || player.socketId !== socket.id) return;
         const result = removePlayerFromRoom(io, room, playerId);
         socket.leave(roomCode);
         

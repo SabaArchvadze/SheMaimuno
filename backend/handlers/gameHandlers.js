@@ -1,4 +1,5 @@
 const questionList = require('../questions');
+const { resolveVotingResult } = require('./voteResolution');
 
 const getRandomQuestion = () => {
     if (!questionList || questionList.length === 0) return null;
@@ -8,6 +9,8 @@ const getRandomQuestion = () => {
 const startGame = (io, socket, rooms, roomCode) => {
     const room = rooms[roomCode];
     if (!room || room.players.length < 2) return; 
+    const host = room.players.find(p => p.isHost);
+    if (!host || host.socketId !== socket.id) return;
 
     room.gameState = 'WRITING';
     room.answers = [];
@@ -40,7 +43,7 @@ const submitAnswer = (io, socket, rooms, { roomCode, playerId, answer }) => {
     if (!room || room.gameState !== 'WRITING') return;
 
     const player = room.players.find(p => p.id === playerId);
-    if (!player) return;
+    if (!player || player.socketId !== socket.id) return;
 
     const existingIndex = room.answers.findIndex(a => a.playerId === playerId);
     if (existingIndex !== -1) {
@@ -60,6 +63,8 @@ const submitAnswer = (io, socket, rooms, { roomCode, playerId, answer }) => {
 const retractAnswer = (io, socket, rooms, { roomCode, playerId }) => {
     const room = rooms[roomCode];
     if (!room) return;
+    const player = room.players.find(p => p.id === playerId);
+    if (!player || player.socketId !== socket.id) return;
     
     room.answers = room.answers.filter(a => a.playerId !== playerId);
     io.to(roomCode).emit('updateAnswerCount', room.answers.map(a => a.playerId));
@@ -68,39 +73,13 @@ const retractAnswer = (io, socket, rooms, { roomCode, playerId }) => {
 const submitVote = (io, socket, rooms, { roomCode, voterId, targetId }) => {
     const room = rooms[roomCode];
     if (!room || room.gameState !== 'VOTING') return;
+    const voter = room.players.find(p => p.id === voterId);
+    if (!voter || voter.socketId !== socket.id) return;
+    if (!room.players.some(p => p.id === targetId) || voterId === targetId) return;
 
     room.votes[voterId] = targetId;
 
-    const currentPlayerIds = room.players.map(p => p.id);
-    
-    const validVotes = Object.keys(room.votes).filter(id => currentPlayerIds.includes(id));
-
-    if (validVotes.length >= room.players.length) {
-        const voteCounts = {};
-        Object.values(room.votes).forEach(target => {
-            voteCounts[target] = (voteCounts[target] || 0) + 1;
-        });
-
-        let maxVotes = 0;
-        let mostSusId = null;
-        for (const [pid, count] of Object.entries(voteCounts)) {
-            if (count > maxVotes) {
-                maxVotes = count;
-                mostSusId = pid;
-            }
-        }
-
-        const impostorCaught = mostSusId === room.impostorId;
-        const impObj = room.players.find(p => p.id === room.impostorId);
-        const impostorName = impObj ? impObj.name : "Unknown";
-
-        io.to(roomCode).emit('gameOver', {
-            impostorCaught,
-            impostorName,
-            realQuestion: room.currentQuestion
-        });
-        room.gameState = 'RESULT';
-    }
+    resolveVotingResult(io, room);
 };
 
 module.exports = { startGame, submitAnswer, submitVote, retractAnswer };

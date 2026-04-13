@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 
-// --- ASSETS ---
 import face1 from '../assets/monkey-face1.svg';
 import face2 from '../assets/monkey-face2.svg';
 import face3 from '../assets/monkey-face3.svg';
 
-// --- CONSTANTS ---
+const MONKEY_MOVE_SPEED = 0.24;
+const MONKEY_THINK_INTERVAL_MS = 2200;
+
 const POSES = {
   IDLE: {
     body: "M 25,30 Q 38,45 25,60 Q 12,45 25,30",
@@ -83,8 +84,7 @@ function SingleMonkey({ view, winState, headSrc, initialPos, sizeScale, depthOff
       return; 
     }
 
-    let intervalTime = 1500 + Math.random() * 2000;
-    if (view === 'RESULT' && winState === true) intervalTime = 800;
+    const intervalTime = MONKEY_THINK_INTERVAL_MS;
 
     const think = () => {
       if (isBusyRef.current) return;
@@ -115,7 +115,7 @@ function SingleMonkey({ view, winState, headSrc, initialPos, sizeScale, depthOff
       else if (view === 'GAME') {
         const dest = Math.random() > 0.5 ? 10 : 90;
         const noise = (Math.random() * 20) - 10;
-        runTo(dest + noise, 'fast');
+        runTo(dest + noise);
       }
 
       else if (view === 'WAITING') {
@@ -165,7 +165,7 @@ function SingleMonkey({ view, winState, headSrc, initialPos, sizeScale, depthOff
     }, 100);
   };
 
-  const runTo = (destination, speedMode) => {
+  const runTo = (destination) => {
     isBusyRef.current = true;
 
     setPos((currentX) => {
@@ -178,8 +178,7 @@ function SingleMonkey({ view, winState, headSrc, initialPos, sizeScale, depthOff
       const dir = dist > 0 ? 1 : -1;
       setDirection(dir);
 
-      const baseSpeed = speedMode === 'fast' ? 0.6 : 0.2;
-      const speed = baseSpeed + (Math.random() * 0.1);
+      const speed = MONKEY_MOVE_SPEED;
 
       if (loopRef.current) clearInterval(loopRef.current);
 
