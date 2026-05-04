@@ -1,5 +1,7 @@
 const { v4: uuidv4 } = require('uuid');
 const { resolveVotingResult, buildVoteBreakdown } = require('./voteResolution');
+const AVATAR_VARIANTS = 3;
+const MAX_PLAYERS_PER_ROOM = 9;
 
 const buildLeaderboard = (room) => (
     room.players
@@ -29,7 +31,7 @@ const createRoom = (io, socket, rooms, playerName, callback) => {
         name: playerName,
         isHost: true,
         score: 0,
-        avatar: Math.floor(Math.random() * 4)
+        avatar: Math.floor(Math.random() * AVATAR_VARIANTS)
     };
 
     rooms[roomCode].players.push(newPlayer);
@@ -48,6 +50,11 @@ const joinRoom = (io, socket, rooms, { roomCode, playerName }, callback) => {
     const room = rooms[code];
 
     if (room && room.gameState === 'LOBBY') {
+        if (room.players.length >= MAX_PLAYERS_PER_ROOM) {
+            callback({ success: false, error: "Room is full (max 9 players)." });
+            return;
+        }
+
         const playerId = uuidv4();
         const newPlayer = {
             id: playerId,
@@ -55,7 +62,7 @@ const joinRoom = (io, socket, rooms, { roomCode, playerName }, callback) => {
             name: playerName,
             isHost: false,
             score: 0,
-            avatar: Math.floor(Math.random() * 4)
+            avatar: Math.floor(Math.random() * AVATAR_VARIANTS)
         };
 
         room.players.push(newPlayer);
@@ -83,7 +90,10 @@ const reconnect = (io, socket, rooms, { roomCode, playerId }, callback) => {
     io.to(roomCode).emit('updatePlayers', room.players);
 
     if (room.gameState === 'VOTING') {
-        socket.emit('startVoting', room.answers);
+        socket.emit('startVoting', {
+            answers: room.answers,
+            normalQuestion: room.currentQuestion
+        });
     }
 
     callback({
@@ -91,6 +101,7 @@ const reconnect = (io, socket, rooms, { roomCode, playerId }, callback) => {
         roomCode,
         playerId,
         gameState: room.gameState,
+        normalQuestion: room.currentQuestion,
         players: room.players,
         hasSubmitted: room.answers.some(a => a.playerId === playerId),
         submittedCount: room.answers.length,
@@ -137,7 +148,10 @@ const removePlayerFromRoom = (io, room, playerId) => {
 
             if (room.answers.length >= room.players.length) {
                 room.gameState = 'VOTING';
-                io.to(room.code).emit('startVoting', room.answers);
+                io.to(room.code).emit('startVoting', {
+                    answers: room.answers,
+                    normalQuestion: room.currentQuestion
+                });
             }
         } 
         else if (room.gameState === 'VOTING') {
@@ -148,7 +162,10 @@ const removePlayerFromRoom = (io, room, playerId) => {
                     delete room.votes[voterId];
                 }
             });
-            io.to(room.code).emit('startVoting', room.answers);
+            io.to(room.code).emit('startVoting', {
+                answers: room.answers,
+                normalQuestion: room.currentQuestion
+            });
             
             resolveVotingResult(io, room);
         }

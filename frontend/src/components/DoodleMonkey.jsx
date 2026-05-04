@@ -6,6 +6,8 @@ import face3 from '../assets/monkey-face3.svg';
 
 const MONKEY_MOVE_SPEED = 0.24;
 const MONKEY_THINK_INTERVAL_MS = 2200;
+const RESULT_WIN_JUMP_INTERVAL_MS = 700;
+const RESULT_WIN_LAND_MS = 320;
 
 const POSES = {
   IDLE: {
@@ -75,6 +77,8 @@ function SingleMonkey({ view, winState, headSrc, initialPos, sizeScale, depthOff
     if (logicRef.current) clearInterval(logicRef.current);
     if (loopRef.current) clearInterval(loopRef.current); 
     isBusyRef.current = false;
+    setOffsetY(0);
+    setPoseKey('IDLE');
 
     if (view === 'CREDITS') {
       setPoseKey('WAVE_A');
@@ -84,7 +88,9 @@ function SingleMonkey({ view, winState, headSrc, initialPos, sizeScale, depthOff
       return; 
     }
 
-    const intervalTime = MONKEY_THINK_INTERVAL_MS;
+    const intervalTime = view === 'RESULT' && winState === true
+      ? RESULT_WIN_JUMP_INTERVAL_MS
+      : MONKEY_THINK_INTERVAL_MS;
 
     const think = () => {
       if (isBusyRef.current) return;
@@ -107,7 +113,7 @@ function SingleMonkey({ view, winState, headSrc, initialPos, sizeScale, depthOff
         else if (dice < 0.20) wave();
         else if (dice < 0.60) {
           const dest = 5 + Math.random() * 90;
-          runTo(dest, 'normal');
+          runTo(dest);
         }
         else setPoseKey('IDLE');
       }
@@ -129,7 +135,7 @@ function SingleMonkey({ view, winState, headSrc, initialPos, sizeScale, depthOff
           setTimeout(() => {
             setOffsetY(0);
             setPoseKey('IDLE');
-          }, 400);
+          }, RESULT_WIN_LAND_MS);
         } else {
           setPoseKey('SCARED');
           setOffsetY(0);
@@ -149,6 +155,7 @@ function SingleMonkey({ view, winState, headSrc, initialPos, sizeScale, depthOff
 
   const wave = () => {
     if (loopRef.current) clearInterval(loopRef.current);
+    loopRef.current = null;
     isBusyRef.current = true;
 
     let count = 0;
@@ -159,6 +166,7 @@ function SingleMonkey({ view, winState, headSrc, initialPos, sizeScale, depthOff
       count++;
       if (count > 8) { 
         clearInterval(loopRef.current);
+        loopRef.current = null;
         setPoseKey('IDLE');
         isBusyRef.current = false;
       }
@@ -177,6 +185,7 @@ function SingleMonkey({ view, winState, headSrc, initialPos, sizeScale, depthOff
 
       const dir = dist > 0 ? 1 : -1;
       setDirection(dir);
+      setPoseKey('RUN_A');
 
       const speed = MONKEY_MOVE_SPEED;
 
@@ -186,6 +195,7 @@ function SingleMonkey({ view, winState, headSrc, initialPos, sizeScale, depthOff
         setPos((prev) => {
           if ((dir === 1 && prev >= destination) || (dir === -1 && prev <= destination)) {
             clearInterval(loopRef.current);
+            loopRef.current = null;
             setPoseKey('IDLE');
             isBusyRef.current = false;
             return destination;
@@ -200,10 +210,10 @@ function SingleMonkey({ view, winState, headSrc, initialPos, sizeScale, depthOff
   };
 
   useEffect(() => {
-    if (loopRef.current && (poseKey.startsWith('RUN') || poseKey === 'IDLE')) {
+    if (isBusyRef.current && poseKey.startsWith('RUN')) {
       setPoseKey(frame % 10 < 5 ? 'RUN_A' : 'RUN_B');
     }
-  }, [frame]);
+  }, [frame, poseKey]);
 
   const currentPath = POSES[poseKey];
   const width = 50 * sizeScale;

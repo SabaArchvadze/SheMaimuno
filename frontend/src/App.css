@@ -290,6 +290,12 @@ button {
   filter: none;
 }
 
+.btn-compact {
+  font-size: 1.1rem;
+  padding: 4px 10px;
+  margin: 8px 6px 0;
+}
+
 .btn-link {
   border: 2px solid var(--ink);
   border-radius: 999px;
@@ -325,16 +331,53 @@ button {
   justify-content: center;
 }
 
-.avatar-circle {
-  width: 45px; height: 45px;
-  border: 2px solid var(--ink); border-radius: 50%;
-  display: inline-flex; align-items: center; justify-content: center;
-  font-size: 24px; background: #fff; margin-right: 10px; flex-shrink: 0;
+.ready-counter {
+  position: absolute;
+  top: -52px;
+  right: -54px;
+  font-family: 'Mandys Sketch', cursive;
+  font-size: 1rem;
+  border: 2px dashed var(--ink);
+  padding: 7px 12px;
+  border-radius: 50% 20% / 10% 40%;
+  background: rgba(255, 255, 255, 0.75);
+  transform: rotate(4deg);
+}
+
+.player-avatar {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.vote-avatar {
+  width: 30px;
+  height: 30px;
 }
 
 .player-row {
   display: flex; align-items: center; justify-content: space-between;
-  border-bottom: 1px dashed #ccc; padding: 10px 5px; font-size: 1.3rem; text-align: left;
+  border-bottom: none; padding: 8px 4px; font-size: 1.18rem; text-align: left;
+}
+
+.lobby-player-grid {
+  width: 100%;
+  display: grid;
+  gap: 2px 16px;
+}
+
+.lobby-grid-1 {
+  grid-template-columns: 1fr;
+}
+
+.lobby-grid-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.lobby-grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .speech-bubble {
@@ -347,7 +390,90 @@ button {
   background: white; border: 2px solid var(--ink); margin: 15px 0;
   padding: 15px; border-radius: 10px; cursor: pointer; text-align: left;
 }
-.vote-card:hover { background: #f9f9f9; border-color: var(--activeborder); transform: rotate(-1deg); }
+.vote-card:hover { background: #f9f9f9; border-color: var(--activeborder); transform: translateY(-1px); }
+
+.voting-title {
+  margin: -44px 0 8px;
+}
+
+.voting-question {
+  margin: 0 0 24px;
+  font-size: 1.15rem;
+  line-height: 1.2;
+  opacity: 0.9;
+}
+
+.vote-card {
+  margin: 8px 0;
+  padding: 8px 10px;
+}
+
+.vote-answer-text {
+  font-size: 1.1rem;
+  line-height: 1.2;
+}
+
+.vote-hint {
+  color: #c6c6c6;
+  font-size: 0.8rem;
+}
+
+.vote-hint--compact {
+  font-size: 0.72rem;
+}
+
+.vote-grid {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+}
+
+.vote-grid .vote-card {
+  margin: 0;
+}
+
+.vote-grid-1 {
+  grid-template-columns: 1fr;
+}
+
+.vote-grid-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.vote-grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.vote-grid-3 .vote-card {
+  padding: 6px 8px;
+}
+
+.vote-grid-3 .vote-card strong {
+  font-size: 1rem;
+}
+
+.vote-grid-3 .vote-avatar {
+  width: 25px;
+  height: 25px;
+  margin-right: 7px;
+}
+
+.vote-grid-3 .vote-answer-text {
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.vote-grid-3 .vote-card:nth-child(6):last-child {
+  grid-column: 2 / 3;
+}
+
+.vote-grid-3 .vote-card:nth-child(6):nth-last-child(2) {
+  grid-column: 1 / 2;
+}
+
+.vote-grid-3 .vote-card:nth-child(7):last-child {
+  grid-column: 2 / 3;
+}
 
 .vote-side-drawer {
   position: fixed;
@@ -399,6 +525,10 @@ button {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.result-action-row {
+  margin-top: 6px;
 }
 
 @keyframes scribble-jitter {

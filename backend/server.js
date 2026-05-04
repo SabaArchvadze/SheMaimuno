@@ -4,7 +4,7 @@ const { Server } = require("socket.io");
 const cors = require('cors');
 
 const { createRoom, joinRoom, reconnect, leaveRoom, removePlayerFromRoom, checkRoom } = require('./handlers/roomHandlers');
-const { startGame, submitAnswer, submitVote, retractAnswer } = require('./handlers/gameHandlers');
+const { startGame, submitAnswer, submitVote, retractAnswer, backToLobby } = require('./handlers/gameHandlers');
 
 const app = express();
 app.use(cors());
@@ -107,6 +107,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('startGame', (code) => startGame(io, socket, rooms, code));
+    socket.on('backToLobby', (code) => backToLobby(io, socket, rooms, code));
     socket.on('submitAnswer', (data) => submitAnswer(io, socket, rooms, data));
     socket.on('retractAnswer', (data) => retractAnswer(io, socket, rooms, data));
     socket.on('submitVote', (data) => submitVote(io, socket, rooms, data));

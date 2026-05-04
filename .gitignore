@@ -14,3 +14,6 @@ dist/
 # System junk
 .DS_Store
 Thumbs.db
+
+# Local stress-testing utilities
+backend/scripts/stressBots.js

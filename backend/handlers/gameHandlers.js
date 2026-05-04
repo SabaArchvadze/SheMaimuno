@@ -1,5 +1,6 @@
 const questionList = require('../questions');
 const { resolveVotingResult } = require('./voteResolution');
+const MIN_PLAYERS_TO_START = 3;
 
 const getRandomQuestion = () => {
     if (!questionList || questionList.length === 0) return null;
@@ -8,7 +9,7 @@ const getRandomQuestion = () => {
 
 const startGame = (io, socket, rooms, roomCode) => {
     const room = rooms[roomCode];
-    if (!room || room.players.length < 2) return; 
+    if (!room || room.players.length < MIN_PLAYERS_TO_START) return; 
     const host = room.players.find(p => p.isHost);
     if (!host || host.socketId !== socket.id) return;
 
@@ -56,7 +57,10 @@ const submitAnswer = (io, socket, rooms, { roomCode, playerId, answer }) => {
 
     if (room.answers.length >= room.players.length) {
         room.gameState = 'VOTING';
-        io.to(roomCode).emit('startVoting', room.answers);
+        io.to(roomCode).emit('startVoting', {
+            answers: room.answers,
+            normalQuestion: room.currentQuestion
+        });
     }
 };
 
@@ -82,4 +86,21 @@ const submitVote = (io, socket, rooms, { roomCode, voterId, targetId }) => {
     resolveVotingResult(io, room);
 };
 
-module.exports = { startGame, submitAnswer, submitVote, retractAnswer };
+const backToLobby = (io, socket, rooms, roomCode) => {
+    const room = rooms[roomCode];
+    if (!room || room.gameState !== 'RESULT') return;
+
+    const host = room.players.find(p => p.isHost);
+    if (!host || host.socketId !== socket.id) return;
+
+    room.gameState = 'LOBBY';
+    room.answers = [];
+    room.votes = {};
+    room.currentQuestion = null;
+    room.impostorId = null;
+
+    io.to(roomCode).emit('gameReset', { message: 'დაბრუნდით ლობიში.' });
+    io.to(roomCode).emit('updatePlayers', room.players);
+};
+
+module.exports = { startGame, submitAnswer, submitVote, retractAnswer, backToLobby };
