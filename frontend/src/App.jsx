@@ -43,6 +43,7 @@ function GameApp() {
   const [submittedCount, setSubmittedCount] = useState(0);
   const [lastVoteBreakdown, setLastVoteBreakdown] = useState([]);
   const [votingQuestion, setVotingQuestion] = useState('');
+  const [kickConfirmPlayerId, setKickConfirmPlayerId] = useState(null);
 
   const changeView = useCallback((newView) => {
     setView(currentView => {
@@ -69,6 +70,26 @@ function GameApp() {
     localStorage.setItem('sm_roomCode', data.roomCode);
     navigate(`/join/${data.roomCode}`, { replace: true });
   }, [navigate]);
+
+  const resetToHomeState = useCallback(() => {
+    localStorage.removeItem('sm_playerId');
+    localStorage.removeItem('sm_roomCode');
+    setPlayerId(null);
+    setRoomCode('');
+    setPlayers([]);
+    setIsHost(false);
+    setMyRole('');
+    setQuestion('');
+    setMyAnswer('');
+    setAllAnswers([]);
+    setResult(null);
+    setHasSubmitted(false);
+    setSubmittedCount(0);
+    setHasVoted(false);
+    setVotingQuestion('');
+    navigate('/');
+    changeView('HOME');
+  }, [changeView, navigate]);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('sm_theme');
@@ -120,11 +141,11 @@ function GameApp() {
             setView('LOBBY');
           }
           else if (res.gameState === 'WRITING') {
+            if (typeof res.submittedCount === 'number') {
+              setSubmittedCount(res.submittedCount);
+            }
             if (res.hasSubmitted) {
               setHasSubmitted(true);
-              if (typeof res.submittedCount === 'number') {
-                setSubmittedCount(res.submittedCount);
-              }
               setView('WAITING');
             } else {
               setHasSubmitted(false);
@@ -133,9 +154,16 @@ function GameApp() {
           }
           else if (res.gameState === 'VOTING') {
             if (res.normalQuestion) setVotingQuestion(res.normalQuestion);
+            if (typeof res.hasVoted === 'boolean') setHasVoted(res.hasVoted);
             setView('VOTING');
           }
           else if (res.gameState === 'RESULT') {
+            if (res.result) {
+              setResult(res.result);
+              if (Array.isArray(res.result.voteBreakdown)) {
+                setLastVoteBreakdown(res.result.voteBreakdown);
+              }
+            }
             setView('RESULT');
           }
 
@@ -150,6 +178,7 @@ function GameApp() {
     socket.on('updatePlayers', (list) => {
       setPlayers(list);
       setAllAnswers(prev => prev.filter(ans => list.some(p => p.id === ans.playerId)));
+      setKickConfirmPlayerId(prev => (prev && !list.some(p => p.id === prev) ? null : prev));
     });
     socket.on('roundStart', ({ role, question }) => {
       setMyRole(role);
@@ -163,10 +192,11 @@ function GameApp() {
     socket.on('startVoting', (payload) => {
       const answers = Array.isArray(payload) ? payload : payload.answers || [];
       const normalQuestion = Array.isArray(payload) ? '' : payload.normalQuestion || '';
+      const yourHasVoted = Array.isArray(payload) ? false : Boolean(payload?.yourHasVoted);
       setAllAnswers(answers);
       if (normalQuestion) setVotingQuestion(normalQuestion);
       changeView('VOTING');
-      setHasVoted(false);
+      setHasVoted(yourHasVoted);
     });
     socket.on('gameOver', (res) => {
       setResult(res);
@@ -185,6 +215,10 @@ function GameApp() {
       setHasSubmitted(false);
       setResult(null);
     });
+    socket.on('kicked', ({ message }) => {
+      showToast(message || 'You were removed from the room.', 'error');
+      resetToHomeState();
+    });
 
     return () => {
       socket.off('updatePlayers');
@@ -192,15 +226,20 @@ function GameApp() {
       socket.off('startVoting');
       socket.off('gameOver');
       socket.off('gameReset');
+      socket.off('kicked');
       socket.off('updateAnswerCount');
       socket.off('playerAnswered');
     };
-  }, [changeView, navigate, setupSession, showToast, urlRoomCode]);
+  }, [changeView, navigate, resetToHomeState, setupSession, showToast, urlRoomCode]);
 
   useEffect(() => {
     const me = players.find(p => p.id === playerId);
     setIsHost(!!(me && me.isHost));
   }, [players, playerId]);
+
+  useEffect(() => {
+    if (!isHost) setKickConfirmPlayerId(null);
+  }, [isHost]);
 
 
   const toggleTheme = () => {
@@ -293,6 +332,23 @@ function GameApp() {
     showToast('Link copied to clipboard!', 'success')
   };
 
+  const requestKickPlayer = (targetPlayerId) => {
+    const target = players.find(p => p.id === targetPlayerId);
+    if (!target) {
+      showToast('Player not found.', 'error');
+      return;
+    }
+
+    socket.emit('kickPlayer', { roomCode, targetPlayerId }, (res = {}) => {
+      if (!res.success) {
+        showToast(res.error || 'Kick failed.', 'error');
+      } else {
+        showToast(`${res.kickedName || target.name} was kicked.`, 'success');
+        setKickConfirmPlayerId(null);
+      }
+    });
+  };
+
   const getAvatarHead = (avatarIndex) => {
     const numericIndex = Number.isInteger(avatarIndex) ? avatarIndex : Number(avatarIndex) || 0;
     return MONKEY_HEADS[Math.abs(numericIndex) % MONKEY_HEADS.length];
@@ -311,6 +367,12 @@ function GameApp() {
     : allAnswers.length <= 6
       ? 'vote-grid-2'
       : 'vote-grid-3';
+  const canStartGame = players.length >= 3;
+  const kickDensityClass = players.length <= 3
+    ? 'kick-ui-roomy'
+    : players.length <= 6
+      ? 'kick-ui-regular'
+      : 'kick-ui-compact';
 
   return (
     <div className="app-container">
@@ -389,19 +451,47 @@ function GameApp() {
                   <div style={{ opacity: 0.5 }}>Connecting to server...</div>
                 ) : (
                   players.map(p => (
-                    <div key={p.id} className="player-row">
-                      <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <img src={getAvatarHead(p.avatar)} alt="" className="player-avatar" />
-                        {p.name} {p.id === playerId && "(You)"}
-                      </div>
-                      {p.isHost && <span style={{ color: 'orange' }}>👑</span>}
+                    <div key={p.id} className={`player-row ${isHost && p.id !== playerId ? 'kickable-player' : ''}`}>
+                      {kickConfirmPlayerId === p.id ? (
+                        <div className={`kick-confirm-inline ${kickDensityClass}`}>
+                          <span>{players.length <= 3 ? 'Kick player?' : 'Kick?'}</span>
+                          <button className="kick-confirm-action" onClick={() => requestKickPlayer(p.id)}>Yes</button>
+                          <button className="kick-confirm-action kick-confirm-cancel" onClick={() => setKickConfirmPlayerId(null)}>No</button>
+                        </div>
+                      ) : (
+                        <>
+                          <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <img src={getAvatarHead(p.avatar)} alt="" className="player-avatar" />
+                            {p.name} {p.id === playerId && "(You)"}
+                          </div>
+                          {p.isHost && <span style={{ color: 'orange' }}>👑</span>}
+                          {isHost && p.id !== playerId && (
+                            <button
+                              className={`kick-overlay-btn ${kickDensityClass}`}
+                              onClick={() => setKickConfirmPlayerId(p.id)}
+                              title={`Kick ${p.name}`}
+                            >
+                              ✕
+                            </button>
+                          )}
+                        </>
+                      )}
                     </div>
                   ))
                 )}
               </div>
 
               {isHost ? (
-                <button className="btn-doodle" onClick={() => socket.emit('startGame', roomCode)}>დაიწყე თამაში</button>
+                <>
+                  <button
+                    className={`btn-doodle ${!canStartGame ? 'btn-disabled' : ''}`}
+                    onClick={() => canStartGame && socket.emit('startGame', roomCode)}
+                    disabled={!canStartGame}
+                  >
+                    დაიწყე თამაში
+                  </button>
+                  {!canStartGame && <div className="min-players-note">Minimum 3 players needed to start.</div>}
+                </>
               ) : (
                 <p>დაელოდე ოთახის შემქმნელს...</p>
               )}
@@ -463,7 +553,6 @@ function GameApp() {
 
           {view === 'VOTING' && (
             <>
-              <h2 className="voting-title">ვინ არის მაიმუნი?</h2>
               {votingQuestion && <p className="voting-question">"{votingQuestion}"</p>}
               {!hasVoted ? (
                 <div className={`vote-grid ${voteGridClass}`}>

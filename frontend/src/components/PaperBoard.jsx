@@ -20,6 +20,8 @@ export default function PaperBoard({ children, view, showAnimations }) {
   const latestChildrenRef = useRef(children);
   const crumbleTimerRef = useRef(null);
   const uncrumpleTimerRef = useRef(null);
+  const mountTimeRef = useRef(Date.now());
+  const hasInitialTransitionedRef = useRef(false);
 
   useEffect(() => {
     latestViewRef.current = view;
@@ -28,11 +30,23 @@ export default function PaperBoard({ children, view, showAnimations }) {
 
   useEffect(() => {
     if (view !== displayedView && animState === 'STATIC') {
+      const elapsedSinceMount = Date.now() - mountTimeRef.current;
+      const isInitialRefresh = !hasInitialTransitionedRef.current && elapsedSinceMount < 1500;
+      hasInitialTransitionedRef.current = true;
+
+      if (isInitialRefresh || !showAnimations) {
+        setDisplayedView(view);
+        setDisplayContent(children);
+        setAnimState('STATIC');
+        setIsVideoPlaying(false);
+        return;
+      }
+
       startCrumpleSequence();
     } else if (view === displayedView && animState === 'STATIC') {
       setDisplayContent(children);
     }
-  }, [view, displayedView, animState, children]);
+  }, [view, displayedView, animState, children, showAnimations]);
 
   useEffect(() => {
     return () => {
@@ -75,7 +89,7 @@ export default function PaperBoard({ children, view, showAnimations }) {
         className={`paper-frame-img ${isVideoPlaying ? 'invisible' : ''}`}
       />
 
-      {animState !== 'STATIC' && (
+      {animState !== 'STATIC' && showAnimations && (
         <video
           key={videoKey}
           src={animState === 'CRUMPLING' ? paperOut : paperIn}
@@ -83,7 +97,7 @@ export default function PaperBoard({ children, view, showAnimations }) {
           autoPlay
           muted
           playsInline
-          onPlay={(e) => {
+          onPlay={() => {
             setIsVideoPlaying(true);
           }}
         />

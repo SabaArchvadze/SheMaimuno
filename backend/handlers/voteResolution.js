@@ -15,6 +15,9 @@ const buildVoteBreakdown = (room) => {
 };
 
 const resolveVotingResult = (io, room) => {
+    // Idempotency: avoid scoring/emitting twice if somehow called again.
+    if (room.gameState === 'RESULT' && room.lastGameOver) return true;
+
     const currentIds = room.players.map(p => p.id);
     const validVotes = Object.keys(room.votes).filter(id => currentIds.includes(id));
 
@@ -60,14 +63,17 @@ const resolveVotingResult = (io, room) => {
         .sort((a, b) => b.score - a.score);
     const voteBreakdown = buildVoteBreakdown(room);
 
-    io.to(room.code).emit('gameOver', {
+    const payload = {
         impostorCaught,
         impostorName,
         realQuestion: room.currentQuestion,
         outcome,
         leaderboard,
         voteBreakdown
-    });
+    };
+
+    io.to(room.code).emit('gameOver', payload);
+    room.lastGameOver = payload;
     room.gameState = 'RESULT';
     return true;
 };

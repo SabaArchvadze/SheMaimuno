@@ -2,12 +2,38 @@ const { v4: uuidv4 } = require('uuid');
 const { resolveVotingResult, buildVoteBreakdown } = require('./voteResolution');
 const AVATAR_VARIANTS = 3;
 const MAX_PLAYERS_PER_ROOM = 9;
+const MIN_PLAYERS_TO_CONTINUE = 3;
 
 const buildLeaderboard = (room) => (
     room.players
         .map(p => ({ name: p.name, score: p.score, avatar: p.avatar, isImpostor: p.id === room.impostorId }))
         .sort((a, b) => b.score - a.score)
 );
+
+const getUniquePlayerName = (room, requestedName) => {
+    const baseName = String(requestedName || '').trim() || 'Player';
+    const takenNames = new Set(room.players.map(p => String(p.name || '')));
+    if (!takenNames.has(baseName)) return baseName;
+
+    let suffix = 1;
+    let candidate = `${baseName} (${suffix})`;
+    while (takenNames.has(candidate)) {
+        suffix += 1;
+        candidate = `${baseName} (${suffix})`;
+    }
+    return candidate;
+};
+
+const resetRoundStateToLobby = (io, room, message) => {
+    room.gameState = 'LOBBY';
+    room.answers = [];
+    room.votes = {};
+    room.currentQuestion = null;
+    room.impostorId = null;
+    room.currentPair = null;
+
+    io.to(room.code).emit('gameReset', { message });
+};
 
 
 
@@ -25,10 +51,11 @@ const createRoom = (io, socket, rooms, playerName, callback) => {
         impostorId: null
     };
 
+    const uniqueName = getUniquePlayerName(rooms[roomCode], playerName);
     const newPlayer = {
         id: playerId,
         socketId: socket.id,
-        name: playerName,
+        name: uniqueName,
         isHost: true,
         score: 0,
         avatar: Math.floor(Math.random() * AVATAR_VARIANTS)
@@ -55,11 +82,12 @@ const joinRoom = (io, socket, rooms, { roomCode, playerName }, callback) => {
             return;
         }
 
+        const uniqueName = getUniquePlayerName(room, playerName);
         const playerId = uuidv4();
         const newPlayer = {
             id: playerId,
             socketId: socket.id,
-            name: playerName,
+            name: uniqueName,
             isHost: false,
             score: 0,
             avatar: Math.floor(Math.random() * AVATAR_VARIANTS)
@@ -90,9 +118,11 @@ const reconnect = (io, socket, rooms, { roomCode, playerId }, callback) => {
     io.to(roomCode).emit('updatePlayers', room.players);
 
     if (room.gameState === 'VOTING') {
+        const hasVoted = Boolean(room.votes[playerId]);
         socket.emit('startVoting', {
             answers: room.answers,
-            normalQuestion: room.currentQuestion
+            normalQuestion: room.currentQuestion,
+            yourHasVoted: hasVoted
         });
     }
 
@@ -105,6 +135,8 @@ const reconnect = (io, socket, rooms, { roomCode, playerId }, callback) => {
         players: room.players,
         hasSubmitted: room.answers.some(a => a.playerId === playerId),
         submittedCount: room.answers.length,
+        hasVoted: room.gameState === 'VOTING' ? Boolean(room.votes[playerId]) : undefined,
+        result: room.gameState === 'RESULT' ? room.lastGameOver : undefined,
         roundInfo: room.gameState !== 'LOBBY' ? {
             question: player.id === room.impostorId ? room.currentPair.impostor : room.currentPair.normal,
             role: player.id === room.impostorId ? 'IMPOSTOR' : 'NORMAL'
@@ -127,17 +159,24 @@ const removePlayerFromRoom = (io, room, playerId) => {
         room.players[0].isHost = true;
     }
 
+    if (room.players.length < MIN_PLAYERS_TO_CONTINUE && room.gameState !== 'LOBBY') {
+        resetRoundStateToLobby(io, room, 'Less than 3 players left. Returning to lobby.');
+        return 'UPDATED';
+    }
+
     if (room.gameState === 'WRITING' || room.gameState === 'VOTING') {
         
         if (playerToRemove.id === room.impostorId) {
-            io.to(room.code).emit('gameOver', {
+            const payload = {
                 impostorCaught: true,
                 impostorName: `${playerToRemove.name} (Ran Away)`,
                 realQuestion: room.currentQuestion,
                 outcome: "CAUGHT",
                 leaderboard: buildLeaderboard(room),
                 voteBreakdown: buildVoteBreakdown(room)
-            });
+            };
+            io.to(room.code).emit('gameOver', payload);
+            room.lastGameOver = payload;
             room.gameState = 'RESULT';
             return 'UPDATED';
         }
@@ -196,4 +235,40 @@ const checkRoom = (rooms, roomCode, callback) => {
     callback(exists);
 };
 
-module.exports = { createRoom, joinRoom, reconnect, leaveRoom, removePlayerFromRoom, checkRoom };
+const kickPlayer = (io, socket, rooms, { roomCode, targetPlayerId }, callback) => {
+    const room = rooms[roomCode];
+    if (!room) return callback({ success: false, error: 'Room not found.' });
+    if (room.gameState !== 'LOBBY') return callback({ success: false, error: 'Kicking is only allowed in lobby.' });
+
+    const host = room.players.find(p => p.isHost);
+    if (!host || host.socketId !== socket.id) return callback({ success: false, error: 'Only host can kick players.' });
+
+    const target = room.players.find(p => p.id === targetPlayerId);
+    if (!target) return callback({ success: false, error: 'Player not found.' });
+    if (target.id === host.id) return callback({ success: false, error: 'Host cannot kick themselves.' });
+
+    io.to(target.socketId).emit('kicked', { message: 'You were removed from the room by host.' });
+    const targetSocket = io.sockets.sockets.get(target.socketId);
+    if (targetSocket) {
+        targetSocket.leave(roomCode);
+    }
+
+    const result = removePlayerFromRoom(io, room, targetPlayerId);
+    if (result === 'EMPTY') {
+        delete rooms[roomCode];
+    } else {
+        io.to(roomCode).emit('updatePlayers', room.players);
+    }
+
+    callback({ success: true, kickedName: target.name });
+};
+
+module.exports = {
+    createRoom,
+    joinRoom,
+    reconnect,
+    leaveRoom,
+    removePlayerFromRoom,
+    checkRoom,
+    kickPlayer
+};

@@ -3,7 +3,7 @@ const http = require('http');
 const { Server } = require("socket.io");
 const cors = require('cors');
 
-const { createRoom, joinRoom, reconnect, leaveRoom, removePlayerFromRoom, checkRoom } = require('./handlers/roomHandlers');
+const { createRoom, joinRoom, reconnect, leaveRoom, removePlayerFromRoom, checkRoom, kickPlayer } = require('./handlers/roomHandlers');
 const { startGame, submitAnswer, submitVote, retractAnswer, backToLobby } = require('./handlers/gameHandlers');
 
 const app = express();
@@ -108,6 +108,7 @@ io.on('connection', (socket) => {
 
     socket.on('startGame', (code) => startGame(io, socket, rooms, code));
     socket.on('backToLobby', (code) => backToLobby(io, socket, rooms, code));
+    socket.on('kickPlayer', (data, cb = () => {}) => kickPlayer(io, socket, rooms, data, cb));
     socket.on('submitAnswer', (data) => submitAnswer(io, socket, rooms, data));
     socket.on('retractAnswer', (data) => retractAnswer(io, socket, rooms, data));
     socket.on('submitVote', (data) => submitVote(io, socket, rooms, data));
