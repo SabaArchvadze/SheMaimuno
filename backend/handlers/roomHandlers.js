@@ -1,4 +1,5 @@
 const { v4: uuidv4 } = require('uuid');
+const { startVotingPayloadExtras, getResultQuestionFields } = require('../questionHelpers');
 const { resolveVotingResult, buildVoteBreakdown } = require('./voteResolution');
 const AVATAR_VARIANTS = 3;
 const MAX_PLAYERS_PER_ROOM = 9;
@@ -24,7 +25,7 @@ const getUniquePlayerName = (room, requestedName) => {
     return candidate;
 };
 
-const resetRoundStateToLobby = (io, room, message) => {
+const resetRoundStateToLobby = (io, room, { messageKey, message } = {}) => {
     room.gameState = 'LOBBY';
     room.answers = [];
     room.votes = {};
@@ -32,7 +33,7 @@ const resetRoundStateToLobby = (io, room, message) => {
     room.impostorId = null;
     room.currentPair = null;
 
-    io.to(room.code).emit('gameReset', { message });
+    io.to(room.code).emit('gameReset', { messageKey, message });
 };
 
 
@@ -122,25 +123,35 @@ const reconnect = (io, socket, rooms, { roomCode, playerId }, callback) => {
         socket.emit('startVoting', {
             answers: room.answers,
             normalQuestion: room.currentQuestion,
+            ...startVotingPayloadExtras(room),
             yourHasVoted: hasVoted
         });
     }
 
+    const nqExtras = startVotingPayloadExtras(room);
     callback({
         success: true,
         roomCode,
         playerId,
         gameState: room.gameState,
         normalQuestion: room.currentQuestion,
+        ...nqExtras,
         players: room.players,
         hasSubmitted: room.answers.some(a => a.playerId === playerId),
         submittedCount: room.answers.length,
         hasVoted: room.gameState === 'VOTING' ? Boolean(room.votes[playerId]) : undefined,
         result: room.gameState === 'RESULT' ? room.lastGameOver : undefined,
-        roundInfo: room.gameState !== 'LOBBY' ? {
-            question: player.id === room.impostorId ? room.currentPair.impostor : room.currentPair.normal,
-            role: player.id === room.impostorId ? 'IMPOSTOR' : 'NORMAL'
-        } : null
+        roundInfo: room.gameState !== 'LOBBY' && room.currentPair && room.currentPair.ka ? (() => {
+            const isImpostor = player.id === room.impostorId;
+            const side = isImpostor ? 'impostor' : 'normal';
+            const cp = room.currentPair;
+            return {
+                role: isImpostor ? 'IMPOSTOR' : 'NORMAL',
+                question: cp.ka[side],
+                questionKa: cp.ka[side],
+                questionEn: cp.en[side],
+            };
+        })() : null
     });
 };
 
@@ -160,7 +171,7 @@ const removePlayerFromRoom = (io, room, playerId) => {
     }
 
     if (room.players.length < MIN_PLAYERS_TO_CONTINUE && room.gameState !== 'LOBBY') {
-        resetRoundStateToLobby(io, room, 'Less than 3 players left. Returning to lobby.');
+        resetRoundStateToLobby(io, room, { messageKey: 'belowMinPlayers' });
         return 'UPDATED';
     }
 
@@ -170,7 +181,7 @@ const removePlayerFromRoom = (io, room, playerId) => {
             const payload = {
                 impostorCaught: true,
                 impostorName: `${playerToRemove.name} (Ran Away)`,
-                realQuestion: room.currentQuestion,
+                ...getResultQuestionFields(room),
                 outcome: "CAUGHT",
                 leaderboard: buildLeaderboard(room),
                 voteBreakdown: buildVoteBreakdown(room)
@@ -189,7 +200,8 @@ const removePlayerFromRoom = (io, room, playerId) => {
                 room.gameState = 'VOTING';
                 io.to(room.code).emit('startVoting', {
                     answers: room.answers,
-                    normalQuestion: room.currentQuestion
+                    normalQuestion: room.currentQuestion,
+                    ...startVotingPayloadExtras(room),
                 });
             }
         } 
@@ -203,7 +215,8 @@ const removePlayerFromRoom = (io, room, playerId) => {
             });
             io.to(room.code).emit('startVoting', {
                 answers: room.answers,
-                normalQuestion: room.currentQuestion
+                normalQuestion: room.currentQuestion,
+                ...startVotingPayloadExtras(room),
             });
             
             resolveVotingResult(io, room);
@@ -247,7 +260,7 @@ const kickPlayer = (io, socket, rooms, { roomCode, targetPlayerId }, callback) =
     if (!target) return callback({ success: false, error: 'Player not found.' });
     if (target.id === host.id) return callback({ success: false, error: 'Host cannot kick themselves.' });
 
-    io.to(target.socketId).emit('kicked', { message: 'You were removed from the room by host.' });
+    io.to(target.socketId).emit('kicked', { messageKey: 'kicked' });
     const targetSocket = io.sockets.sockets.get(target.socketId);
     if (targetSocket) {
         targetSocket.leave(roomCode);

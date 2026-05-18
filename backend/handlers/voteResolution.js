@@ -1,3 +1,5 @@
+const { getResultQuestionFields } = require('../questionHelpers');
+
 const buildVoteBreakdown = (room) => {
     const voteCounts = {};
     Object.values(room.votes || {}).forEach(targetId => {
@@ -66,7 +68,7 @@ const resolveVotingResult = (io, room) => {
     const payload = {
         impostorCaught,
         impostorName,
-        realQuestion: room.currentQuestion,
+        ...getResultQuestionFields(room),
         outcome,
         leaderboard,
         voteBreakdown

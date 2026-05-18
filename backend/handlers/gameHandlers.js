@@ -1,4 +1,5 @@
 const questionList = require('../questions');
+const { startVotingPayloadExtras } = require('../questionHelpers');
 const { resolveVotingResult } = require('./voteResolution');
 const MIN_PLAYERS_TO_START = 3;
 
@@ -22,17 +23,25 @@ const startGame = (io, socket, rooms, roomCode) => {
 
     const qPair = getRandomQuestion();
     if (!qPair) {
-        room.currentPair = { normal: "Error", impostor: "Error" };
+        room.currentPair = {
+            id: 0,
+            ka: { normal: 'Error', impostor: 'Error' },
+            en: { normal: 'Error', impostor: 'Error' },
+        };
     } else {
         room.currentPair = qPair;
     }
-    room.currentQuestion = room.currentPair.normal;
+    room.currentQuestion = room.currentPair.ka.normal;
 
     room.players.forEach(p => {
         const isImpostor = p.id === room.impostorId;
+        const side = isImpostor ? 'impostor' : 'normal';
+        const cp = room.currentPair;
         io.to(p.socketId).emit('roundStart', {
             role: isImpostor ? 'IMPOSTOR' : 'NORMAL',
-            question: isImpostor ? room.currentPair.impostor : room.currentPair.normal
+            question: cp.ka[side],
+            questionKa: cp.ka[side],
+            questionEn: cp.en[side],
         });
     });
     
@@ -59,7 +68,8 @@ const submitAnswer = (io, socket, rooms, { roomCode, playerId, answer }) => {
         room.gameState = 'VOTING';
         io.to(roomCode).emit('startVoting', {
             answers: room.answers,
-            normalQuestion: room.currentQuestion
+            normalQuestion: room.currentQuestion,
+            ...startVotingPayloadExtras(room),
         });
     }
 };
@@ -97,9 +107,10 @@ const backToLobby = (io, socket, rooms, roomCode) => {
     room.answers = [];
     room.votes = {};
     room.currentQuestion = null;
+    room.currentPair = null;
     room.impostorId = null;
 
-    io.to(roomCode).emit('gameReset', { message: 'დაბრუნდით ლობიში.' });
+    io.to(roomCode).emit('gameReset', { messageKey: 'backToLobbyMessage' });
     io.to(roomCode).emit('updatePlayers', room.players);
 };
 

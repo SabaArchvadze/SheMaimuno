@@ -1,13 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import './Toast.css';
+import { useI18n } from '../i18n/I18nContext';
 
-export default function Toast({ message, type, onClose, duration = 3000 }) {
+export default function Toast({
+  message,
+  messageKey,
+  messageParams,
+  type,
+  openKey,
+  onClose,
+  duration = 3000,
+}) {
+  const { t } = useI18n();
   const [isExiting, setIsExiting] = useState(false);
+
+  const display = useMemo(() => {
+    if (messageKey) {
+      return t(`toasts.${messageKey}`, messageParams);
+    }
+    return message || '';
+  }, [messageKey, messageParams, message, t]);
 
   useEffect(() => {
     setIsExiting(false);
 
-    if (!message) return;
+    if (!openKey) return;
+    if (!display && !messageKey) return;
 
     const exitTimer = setTimeout(() => {
       setIsExiting(true);
@@ -15,21 +33,22 @@ export default function Toast({ message, type, onClose, duration = 3000 }) {
 
     const closeTimer = setTimeout(() => {
       onClose();
-      setIsExiting(false); 
+      setIsExiting(false);
     }, duration);
 
     return () => {
       clearTimeout(exitTimer);
       clearTimeout(closeTimer);
     };
-  }, [message, duration, onClose]);
+  }, [openKey, duration, onClose, display, messageKey]);
 
-  if (!message) return null;
+  if (!openKey) return null;
+  if (!display) return null;
 
   return (
     <div className="toast-container">
       <div className={`toast-box ${type} ${isExiting ? 'toast-exit' : ''}`}>
-        {message}
+        {display}
       </div>
     </div>
   );
