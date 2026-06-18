@@ -487,11 +487,11 @@ function GameApp() {
 
           {view !== 'HOME' && (
             <div
-              onClick={leaveGame}
+              onClick={view === 'CREDITS' ? () => changeView('HOME') : leaveGame}
               className="leave-game-btn"
               onMouseEnter={e => e.currentTarget.style.opacity = 1}
               onMouseLeave={e => e.currentTarget.style.opacity = 0.6}
-              title={t('lobby.leaveGame')}
+              title={view === 'CREDITS' ? t('credits.back') : t('lobby.leaveGame')}
             >
               <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M19 12H5" />
@@ -685,10 +685,6 @@ function GameApp() {
                   <a href="https://www.vecteezy.com/free-videos/abstract" style={{ color: "black" }} target='_blank' rel="noreferrer">Abstract Stock Videos by Vecteezy</a>
                 </p>
               </div>
-
-              <button className="btn-doodle" style={{ marginTop: '20px' }} onClick={() => changeView('HOME')}>
-                {t('credits.back')}
-              </button>
             </>
           )}
 

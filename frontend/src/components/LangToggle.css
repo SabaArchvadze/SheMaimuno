@@ -3,78 +3,49 @@
   top: 140px;
   right: 20px;
   z-index: 9999;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  display: inline-flex;
+  align-items: stretch;
+  gap: 0;
+  padding: 3px;
   font-family: 'Mandys Sketch', cursive;
-  cursor: pointer;
-  user-select: none;
   background-color: var(--paper);
-  padding: 6px 10px;
   border: 2px solid var(--ink);
-  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
-  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.12);
 }
 
-.lang-toggle:hover {
-  background-color: #fffef0;
-}
-
-.lang-side {
-  font-size: 0.9rem;
-  color: var(--ink);
-  opacity: 0.5;
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
-
-.lang-side.active {
-  opacity: 1;
-  transform: scale(1.05);
-}
-
-.lang-switch__input {
-  --switch-width: 40px;
-  --switch-height: 22px;
-  --border-thickness: 2px;
-  --knob-size: 14px;
-  --trans-dur: 0.25s;
-
-  appearance: none;
-  -webkit-appearance: none;
-  outline: transparent;
-  position: relative;
-  width: var(--switch-width);
-  height: var(--switch-height);
-  background-color: #87CEEB;
-  border: var(--border-thickness) solid var(--ink);
-  border-radius: 99px;
-  transition: background-color var(--trans-dur);
-  cursor: pointer;
-  box-sizing: border-box;
+.lang-toggle__btn {
   margin: 0;
+  padding: 6px 14px;
+  min-width: 44px;
+  font: inherit;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  color: var(--ink);
+  background: transparent;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity 0.15s ease, background-color 0.15s ease, color 0.15s ease;
 }
 
-.lang-switch__input:after {
-  content: "";
-  display: block;
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  left: 3px;
-  width: var(--knob-size);
-  height: var(--knob-size);
-  border-radius: 50%;
-  border: 2px solid var(--ink);
+.lang-toggle__btn:hover {
+  opacity: 0.85;
+}
+
+.lang-toggle__btn--active {
+  opacity: 1;
   background-color: var(--banana);
-  transition: transform var(--trans-dur), background-color var(--trans-dur);
-  z-index: 2;
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--ink);
 }
 
-.lang-switch__input:checked {
-  background-color: #2c2c54;
+.lang-toggle__btn:focus-visible {
+  outline: 2px solid var(--leaf);
+  outline-offset: 2px;
 }
 
-.lang-switch__input:checked:after {
-  background-color: #f5f6fa;
-  transform: translate(16px, -50%);
+body.dark-mode .lang-toggle {
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.35);
 }
