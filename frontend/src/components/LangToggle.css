@@ -1,8 +1,6 @@
 .lang-toggle {
-  position: fixed;
-  top: 140px;
-  right: 20px;
-  z-index: 9999;
+  position: relative;
+  z-index: 1;
   display: inline-flex;
   align-items: stretch;
   gap: 0;

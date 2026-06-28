@@ -1,5 +1,6 @@
 const express = require('express');
 const http = require('http');
+const path = require('path');
 const { Server } = require("socket.io");
 const cors = require('cors');
 
@@ -13,6 +14,19 @@ const PORT = process.env.PORT || 3001;
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: { origin: "*", methods: ["GET", "POST"] }
+});
+
+// In production the backend also serves the built React frontend so the whole
+// app runs from a single origin (no CORS, one URL/domain).
+const FRONTEND_BUILD = path.join(__dirname, '..', 'frontend', 'build');
+app.use(express.static(FRONTEND_BUILD));
+app.get('/healthz', (req, res) => res.status(200).send('ok'));
+// SPA fallback: any non-asset, non-socket route returns index.html.
+app.use((req, res, next) => {
+    if (req.method !== 'GET') return next();
+    res.sendFile(path.join(FRONTEND_BUILD, 'index.html'), (err) => {
+        if (err) next();
+    });
 });
 
 let rooms = {};

@@ -1,0 +1,16 @@
+{
+  "name": "she-maimuno",
+  "version": "1.0.0",
+  "private": true,
+  "description": "She Maimuno - multiplayer find-the-impostor party game",
+  "engines": {
+    "node": "20.x"
+  },
+  "scripts": {
+    "install:all": "npm install --prefix backend && npm install --prefix frontend",
+    "build": "npm install --prefix frontend && npm --prefix frontend run build && npm install --prefix backend",
+    "start": "npm --prefix backend start",
+    "dev:backend": "npm --prefix backend start",
+    "dev:frontend": "npm --prefix frontend start"
+  }
+}

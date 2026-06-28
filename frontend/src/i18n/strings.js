@@ -75,6 +75,12 @@ export const STRINGS = {
       playerNotFound: 'მოთამაშე ვერ მოიძებნა.', 
       backToLobbyMessage: 'დაბრუნდით ოთახში.',
       belowMinPlayers: 'თამაშის გასაგრძელებლად საკმარისი მოთამაშე არაა. ბრუნდებით ოთახში...',
+      roomFull: 'ოთახი სავსეა (მაქს. 9 მოთამაშე).',
+      gameAlreadyStarted: 'თამაში უკვე დაიწყო!',
+      roomExpired: 'ოთახის ვადა ამოიწურა.',
+      kickLobbyOnly: 'მოთამაშის გაგდება მხოლოდ ლობიშია შესაძლებელი.',
+      kickHostOnly: 'მხოლოდ ოთახის შემქმნელს შეუძლია გაგდება.',
+      kickSelfForbidden: 'შემქმნელი თავის თავს ვერ გააგდებს.',
     }
   },
 
@@ -154,6 +160,12 @@ export const STRINGS = {
       playerNotFound: 'Player not found.',
       backToLobbyMessage: 'Returned to lobby.',
       belowMinPlayers: 'Less than 3 players left. Returning to lobby.',
+      roomFull: 'Room is full (max 9 players).',
+      gameAlreadyStarted: 'Game already started!',
+      roomExpired: 'Room expired.',
+      kickLobbyOnly: 'Kicking is only allowed in the lobby.',
+      kickHostOnly: 'Only the host can kick players.',
+      kickSelfForbidden: 'The host cannot kick themselves.',
     }
   }
 };

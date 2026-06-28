@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import io from 'socket.io-client';
 import { BrowserRouter, Routes, Route, useParams, useNavigate } from 'react-router-dom';
 import './App.css';
+import './responsive.css';
 import DoodleMonkey from './components/DoodleMonkey';
 import titleImage from './assets/title-img.png';
 import face1 from './assets/monkey-face1.svg';
@@ -13,8 +14,12 @@ import AnimToggle from './components/AnimToggle';
 import LangToggle from './components/LangToggle';
 import Toast from './components/Toast';
 import { I18nProvider, useI18n } from './i18n/I18nContext';
+import { resolveServerError } from './i18n/resolveServerError';
 
-const socket = io(process.env.REACT_APP_SOCKET_URL || 'http://localhost:3001');
+const SOCKET_URL =
+  process.env.REACT_APP_SOCKET_URL ||
+  (process.env.NODE_ENV === 'production' ? undefined : 'http://localhost:3001');
+const socket = io(SOCKET_URL);
 const MONKEY_HEADS = [face1, face2, face3];
 
 function GameApp() {
@@ -338,7 +343,7 @@ function GameApp() {
         setIsHost(false);
         changeView('LOBBY');
       } else {
-        showToast(res.error || t('toasts.roomNotFound', { roomCode }), "error");
+        showToast(resolveServerError(res, t, { roomCode }), 'error');
 
       }
     });
@@ -384,7 +389,7 @@ function GameApp() {
 
     socket.emit('kickPlayer', { roomCode, targetPlayerId }, (res = {}) => {
       if (!res.success) {
-        showToast(res.error || t('toasts.kickFailed'), 'error');
+        showToast(resolveServerError(res, t), 'error');
       } else {
         showToast({ messageKey: 'kickedBy', messageParams: { name: res.kickedName || target.name } }, 'success');
         setKickConfirmPlayerId(null);
@@ -436,12 +441,14 @@ function GameApp() {
   return (
     <div className="app-container">
 
-      <ThemeToggle isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
-      <AnimToggle
-        showAnimations={showAnimations}
-        toggleAnimations={toggleAnimations}
-      />
-      <LangToggle />
+      <div className="settings-toolbar">
+        <ThemeToggle isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
+        <AnimToggle
+          showAnimations={showAnimations}
+          toggleAnimations={toggleAnimations}
+        />
+        <LangToggle />
+      </div>
       <aside className={`vote-side-drawer ${view === 'RESULT' && lastVoteBreakdown.length > 0 ? 'visible' : ''}`}>
         <h3>{t('result.voteResults')}</h3>
         {lastVoteBreakdown.map((entry) => (
@@ -565,7 +572,7 @@ function GameApp() {
                 {t('game.readyCounter', { x: submittedCount, total: players.length })}
               </div>
 
-              <h2>{roundQuestionText}</h2>
+              <h2 className="game-question">{roundQuestionText}</h2>
 
               <div className="speech-bubble">
                 <input
@@ -656,7 +663,19 @@ function GameApp() {
               <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{result.impostorName}</div>
               <hr style={{ borderTop: '2px dashed var(--ink)', margin: '20px 0' }} />
               <p>{t('result.questionWas')}</p>
-              <div style={{ fontSize: '1.5rem' }}>"{resultQuestionText}"</div>
+              <div className="result-question">"{resultQuestionText}"</div>
+
+              {lastVoteBreakdown.length > 0 && (
+                <div className="vote-results-mobile">
+                  <h3>{t('result.voteResults')}</h3>
+                  {lastVoteBreakdown.map((entry) => (
+                    <div key={entry.playerId} className="vote-side-row">
+                      <span>{entry.name}</span>
+                      <span>{entry.votes} {t('result.voteSuffix')}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               {isHost && (
                 <div className="result-action-row">

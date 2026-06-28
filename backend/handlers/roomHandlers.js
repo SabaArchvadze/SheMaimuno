@@ -79,7 +79,7 @@ const joinRoom = (io, socket, rooms, { roomCode, playerName }, callback) => {
 
     if (room && room.gameState === 'LOBBY') {
         if (room.players.length >= MAX_PLAYERS_PER_ROOM) {
-            callback({ success: false, error: "Room is full (max 9 players)." });
+            callback({ success: false, errorKey: 'roomFull' });
             return;
         }
 
@@ -99,17 +99,17 @@ const joinRoom = (io, socket, rooms, { roomCode, playerName }, callback) => {
         io.to(code).emit('updatePlayers', room.players);
         callback({ success: true, roomCode: code, playerId, players: room.players });
     } else {
-        if (!room) callback({ success: false, error: "Room not found!" });
-        else callback({ success: false, error: "Game already started!" });
+        if (!room) callback({ success: false, errorKey: 'roomNotFound' });
+        else callback({ success: false, errorKey: 'gameAlreadyStarted' });
     }
 };
 
 const reconnect = (io, socket, rooms, { roomCode, playerId }, callback) => {
     const room = rooms[roomCode];
-    if (!room) return callback({ success: false, error: "Room expired" });
+    if (!room) return callback({ success: false, errorKey: 'roomExpired' });
 
     const player = room.players.find(p => p.id === playerId);
-    if (!player) return callback({ success: false, error: "Player not found" });
+    if (!player) return callback({ success: false, errorKey: 'playerNotFound' });
 
     const previousSocketAlive = player.socketId && io.sockets.sockets.get(player.socketId);
     if (!previousSocketAlive) {
@@ -250,15 +250,15 @@ const checkRoom = (rooms, roomCode, callback) => {
 
 const kickPlayer = (io, socket, rooms, { roomCode, targetPlayerId }, callback) => {
     const room = rooms[roomCode];
-    if (!room) return callback({ success: false, error: 'Room not found.' });
-    if (room.gameState !== 'LOBBY') return callback({ success: false, error: 'Kicking is only allowed in lobby.' });
+    if (!room) return callback({ success: false, errorKey: 'roomNotFound' });
+    if (room.gameState !== 'LOBBY') return callback({ success: false, errorKey: 'kickLobbyOnly' });
 
     const host = room.players.find(p => p.isHost);
-    if (!host || host.socketId !== socket.id) return callback({ success: false, error: 'Only host can kick players.' });
+    if (!host || host.socketId !== socket.id) return callback({ success: false, errorKey: 'kickHostOnly' });
 
     const target = room.players.find(p => p.id === targetPlayerId);
-    if (!target) return callback({ success: false, error: 'Player not found.' });
-    if (target.id === host.id) return callback({ success: false, error: 'Host cannot kick themselves.' });
+    if (!target) return callback({ success: false, errorKey: 'playerNotFound' });
+    if (target.id === host.id) return callback({ success: false, errorKey: 'kickSelfForbidden' });
 
     io.to(target.socketId).emit('kicked', { messageKey: 'kicked' });
     const targetSocket = io.sockets.sockets.get(target.socketId);
