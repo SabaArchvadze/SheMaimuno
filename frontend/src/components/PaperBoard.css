@@ -121,6 +121,13 @@
   box-sizing: border-box;
 }
 
+/*
+  Notebook paper effect:
+  - Warm cream background (#fdf6e3)
+  - Horizontal ruled lines via repeating-linear-gradient
+  - Wobble border matching the rest of the She Maimuno doodle aesthetic
+  - Layered box shadow for paper lift
+*/
 .mobile-panel-content {
   flex: 1;
   min-height: 0;
@@ -130,17 +137,43 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 8px 10px;
+  padding: 10px 14px;
   box-sizing: border-box;
-  background: rgba(255, 252, 240, 0.92);
+
+  background-color: #fdf6e3;
+  background-image:
+    repeating-linear-gradient(
+      transparent 0,
+      transparent 27px,
+      rgba(160, 140, 90, 0.22) 27px,
+      rgba(160, 140, 90, 0.22) 28px
+    );
+  background-attachment: local;
+
   border: 3px solid var(--ink);
-  border-radius: 14px;
-  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.12);
+  border-radius: 255px 8px 220px 10px / 8px 220px 10px 255px;
+  box-shadow:
+    5px 6px 0 rgba(0, 0, 0, 0.16),
+    2px 2px 0 rgba(0, 0, 0, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+
   transition: opacity 0.12s ease;
+  overflow: hidden;
 }
 
 body.dark-mode .mobile-panel-content {
-  background: rgba(28, 28, 28, 0.94);
+  background-color: #1e1a12;
+  background-image:
+    repeating-linear-gradient(
+      transparent 0,
+      transparent 27px,
+      rgba(255, 240, 180, 0.07) 27px,
+      rgba(255, 240, 180, 0.07) 28px
+    );
+  box-shadow:
+    5px 6px 0 rgba(0, 0, 0, 0.45),
+    2px 2px 0 rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .mobile-panel-content.mobile-panel-fade {

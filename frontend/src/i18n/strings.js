@@ -26,6 +26,7 @@ export const STRINGS = {
     },
     ui: {
       animations: 'ანიმაციები',
+      animShort: 'ანიმ',
     },
     mobile: {
       rotateTitle: 'შეატრიალე ტელეფონი',
@@ -115,6 +116,7 @@ export const STRINGS = {
     },
     ui: {
       animations: 'Animations',
+      animShort: 'Anim',
     },
     mobile: {
       rotateTitle: 'Rotate your phone',

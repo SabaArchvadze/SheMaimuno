@@ -1,0 +1,17 @@
+{
+  "name": "She Maimuno",
+  "short_name": "She Maimuno",
+  "description": "Multiplayer find-the-impostor party game",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#FAF5E7",
+  "theme_color": "#FAF5E7",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ]
+}

@@ -134,26 +134,34 @@ body.dark-mode .vote-results-mobile {
     flex-shrink: 0;
     display: flex;
     align-items: center;
-    gap: 6px;
-    min-height: 36px;
+    gap: 5px;
+    min-height: 44px;
     padding: 2px 0;
     z-index: 10000;
   }
 
+  /* Back / spacer button — 44px tap target */
   .mobile-hud-back {
     flex-shrink: 0;
-    width: 34px;
-    height: 34px;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.88);
     border: 2px dashed var(--ink);
     border-radius: 50%;
     padding: 0;
-    opacity: 0.9;
-    transition: opacity 0.15s;
+    opacity: 0.92;
+    transition: opacity 0.15s, transform 0.1s;
+    touch-action: manipulation;
+  }
+
+  .mobile-hud-back:active {
+    transform: scale(0.9);
+    opacity: 1;
   }
 
   body.dark-mode .mobile-hud-back {
@@ -180,7 +188,7 @@ body.dark-mode .vote-results-mobile {
   .mobile-hud-room,
   .mobile-hud-status {
     display: inline-block;
-    padding: 4px 10px;
+    padding: 5px 10px;
     border: 2px dashed var(--ink);
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.75);
@@ -192,44 +200,86 @@ body.dark-mode .vote-results-mobile {
     background: rgba(40, 40, 40, 0.85);
   }
 
+  /* Settings cluster — keep natural size, just ensure row layout */
   .mobile-hud-settings {
     flex-shrink: 0;
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 4px;
+    gap: 5px;
   }
 
+  /* Theme switch: keep desktop proportions, don't shrink */
   .mobile-hud-settings .doodle-switch {
-    --switch-width: 44px;
-    --switch-height: 24px;
-    --knob-size: 15px;
+    --switch-width: 52px;
+    --switch-height: 28px;
+    --knob-size: 18px;
     --border-thickness: 2px;
   }
 
   .mobile-hud-settings .switch__input:checked:after {
-    transform: translate(18px, -50%);
+    transform: translate(22px, -50%);
   }
 
+  /* Fullscreen button */
+  .mobile-hud-fsbutton {
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.88);
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--ink);
+    padding: 0;
+    opacity: 0.85;
+    transition: opacity 0.15s, transform 0.1s;
+    touch-action: manipulation;
+  }
+
+  .mobile-hud-fsbutton:active {
+    transform: scale(0.9);
+    opacity: 1;
+  }
+
+  .mobile-hud-fsbutton.is-fullscreen {
+    background: rgba(255, 225, 53, 0.55);
+  }
+
+  body.dark-mode .mobile-hud-fsbutton {
+    background: rgba(40, 40, 40, 0.9);
+  }
+
+  /* Anim toggle in HUD — compact variant, label always visible */
   .mobile-hud-settings .anim-toggle-container {
     padding: 4px 6px;
     border-radius: 8px;
   }
 
+  /* Show the short label — do NOT hide it */
   .mobile-hud-settings .anim-label {
-    display: none;
+    display: inline;
+    font-size: 0.8rem;
   }
 
   .mobile-hud-settings .anim-checkbox {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+
+  .mobile-hud-settings .lang-toggle {
+    padding: 2px;
   }
 
   .mobile-hud-settings .lang-toggle__btn {
-    padding: 5px 9px;
-    min-width: 34px;
-    min-height: 30px;
-    font-size: 0.78rem;
+    padding: 6px 10px;
+    min-width: 36px;
+    min-height: 34px;
+    font-size: 0.8rem;
   }
 
   /* ─── Stage: panel fills remaining viewport ─── */
@@ -360,20 +410,37 @@ body.dark-mode .vote-results-mobile {
   }
 
   .app-container.use-mobile-panel .mobile-hud {
-    min-height: 32px;
+    min-height: 40px;
   }
 
   .app-container.use-mobile-panel .mobile-hud-back {
-    width: 30px;
-    height: 30px;
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
   }
 
   .app-container.use-mobile-panel .mobile-hud-center {
     font-size: 0.78rem;
   }
 
+  /* Theme switch — stay readable in landscape */
+  .app-container.use-mobile-panel .mobile-hud-settings .doodle-switch {
+    --switch-width: 48px;
+    --switch-height: 26px;
+    --knob-size: 17px;
+  }
+
+  .app-container.use-mobile-panel .mobile-hud-settings .switch__input:checked:after {
+    transform: translate(20px, -50%);
+  }
+
+  .app-container.use-mobile-panel .mobile-hud-settings .anim-toggle-container {
+    padding: 5px 8px;
+    min-height: 34px;
+  }
+
   .app-container.use-mobile-panel .mobile-panel-content {
-    padding: 6px 10px;
+    padding: 8px 12px;
   }
 
   /* ─── HOME landscape ─── */
@@ -681,7 +748,21 @@ body.dark-mode .vote-results-mobile {
 /* Very short landscape */
 @media (max-height: 380px) and (orientation: landscape) {
   .app-container.use-mobile-panel .mobile-hud {
-    min-height: 28px;
+    min-height: 36px;
+  }
+
+  .app-container.use-mobile-panel .mobile-hud-settings .doodle-switch {
+    --switch-width: 44px;
+    --switch-height: 24px;
+    --knob-size: 15px;
+  }
+
+  .app-container.use-mobile-panel .mobile-hud-settings .switch__input:checked:after {
+    transform: translate(18px, -50%);
+  }
+
+  .app-container.use-mobile-panel .mobile-hud-settings .anim-label {
+    display: none;
   }
 
   .app-container.use-mobile-panel .mobile-panel-content {

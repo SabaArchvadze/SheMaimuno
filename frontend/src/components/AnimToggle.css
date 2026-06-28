@@ -55,6 +55,23 @@
   cursor: pointer;
 }
 
+.anim-toggle-compact {
+  padding: 6px 10px;
+  min-height: 38px;
+  gap: 6px;
+}
+
+.anim-toggle-compact .anim-label {
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.anim-toggle-compact .anim-checkbox {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
 @keyframes wiggle {
   0% { transform: rotate(0deg); }
   25% { transform: rotate(-2deg) scale(1.02); }

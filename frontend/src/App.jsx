@@ -16,6 +16,7 @@ import Toast from './components/Toast';
 import { I18nProvider, useI18n } from './i18n/I18nContext';
 import { resolveServerError } from './i18n/resolveServerError';
 import { useMobileLayout, GAMEPLAY_VIEWS } from './hooks/useMobileLayout';
+import { useFullscreen } from './hooks/useFullscreen';
 import RotatePrompt from './components/RotatePrompt';
 
 const SOCKET_URL =
@@ -29,6 +30,7 @@ function GameApp() {
   const navigate = useNavigate();
   const { t, lang } = useI18n();
   const { isMobile, isPortrait, isLandscapePhone } = useMobileLayout();
+  const { isFullscreen, supported: fsSupported, enterFullscreen, exitFullscreen } = useFullscreen();
 
   const [view, setView] = useState('HOME');
 
@@ -488,8 +490,27 @@ function GameApp() {
           </div>
 
           <div className="mobile-hud-settings">
+            {isLandscapePhone && fsSupported && (
+              <button
+                type="button"
+                className={`mobile-hud-fsbutton${isFullscreen ? ' is-fullscreen' : ''}`}
+                onClick={isFullscreen ? exitFullscreen : enterFullscreen}
+                title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+                aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+              >
+                {isFullscreen ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/>
+                  </svg>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>
+                  </svg>
+                )}
+              </button>
+            )}
             <ThemeToggle isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
-            <AnimToggle showAnimations={showAnimations} toggleAnimations={toggleAnimations} />
+            <AnimToggle showAnimations={showAnimations} toggleAnimations={toggleAnimations} compact />
             <LangToggle />
           </div>
         </header>
