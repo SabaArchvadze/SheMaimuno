@@ -257,7 +257,7 @@ function SingleMonkey({ view, winState, headSrc, initialPos, sizeScale, depthOff
   );
 }
 
-export default function DoodleMonkey({ view, winState, showAnimations }) {
+export default function DoodleMonkey({ view, winState, showAnimations, hiddenOnMobile = false }) {
   const monkeys = useMemo(() => {
     const troop = [];
     for (let i = 0; i < 5; i++) {
@@ -277,6 +277,10 @@ export default function DoodleMonkey({ view, winState, showAnimations }) {
     }
     return troop.sort((a, b) => b.depthOffset - a.depthOffset);
   }, []);
+
+  if (hiddenOnMobile) {
+    return null;
+  }
 
   return (
     <>

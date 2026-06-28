@@ -15,6 +15,8 @@ import LangToggle from './components/LangToggle';
 import Toast from './components/Toast';
 import { I18nProvider, useI18n } from './i18n/I18nContext';
 import { resolveServerError } from './i18n/resolveServerError';
+import { useMobileLayout, GAMEPLAY_VIEWS } from './hooks/useMobileLayout';
+import RotatePrompt from './components/RotatePrompt';
 
 const SOCKET_URL =
   process.env.REACT_APP_SOCKET_URL ||
@@ -26,6 +28,7 @@ function GameApp() {
   const { roomCode: urlRoomCode } = useParams(); 
   const navigate = useNavigate();
   const { t, lang } = useI18n();
+  const { isMobile, isPortrait, isLandscapePhone } = useMobileLayout();
 
   const [view, setView] = useState('HOME');
 
@@ -438,10 +441,17 @@ function GameApp() {
       ? 'kick-ui-regular'
       : 'kick-ui-compact';
 
-  return (
-    <div className="app-container">
+  const showRotatePrompt = isMobile && isPortrait && GAMEPLAY_VIEWS.has(view);
 
-      <div className="settings-toolbar">
+  return (
+    <div
+      className={`app-container${isLandscapePhone ? ' is-landscape-phone' : ''}${isMobile ? ' is-mobile' : ''}`}
+      data-view={view}
+    >
+
+      {showRotatePrompt && <RotatePrompt />}
+
+      <div className={`settings-toolbar${showRotatePrompt ? ' behind-rotate' : ''}`}>
         <ThemeToggle isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
         <AnimToggle
           showAnimations={showAnimations}
@@ -464,8 +474,8 @@ function GameApp() {
         alt="She Maimuno title"
         className={`title-img ${view !== 'HOME' ? 'hidden' : ''}`}
       />
-      <div className={`paper-wrapper ${view !== 'HOME' ? 'expanded' : ''}`}>
-        <PaperBoard view={view} showAnimations={showAnimations}>
+      <div className={`paper-wrapper ${view !== 'HOME' ? 'expanded' : ''}`} data-view={view}>
+        <PaperBoard view={view} showAnimations={showAnimations} isMobileLite={isMobile || isLandscapePhone}>
 
           {view === 'HOME' && (
             <>
@@ -476,12 +486,12 @@ function GameApp() {
               ) : (
                 <>
                   <button className="btn-doodle" onClick={handleCreate}>{t('home.newRoom')}</button>
-                  <div style={{ margin: '20px' }}>{t('home.or')}</div>
+                  <div className="home-or" style={{ margin: '20px' }}>{t('home.or')}</div>
                   <input placeholder={t('home.roomCodePlaceholder')} value={roomCode} onChange={e => setRoomCode(e.target.value.toUpperCase())} />
                   <button className="btn-doodle btn-secondary" onClick={handleJoin}>{t('home.joinRoom')}</button>
                 </>
               )}
-              <div style={{ marginTop: '30px', fontSize: '0.9rem', opacity: 0.7 }}>
+              <div className="home-credits-link" style={{ marginTop: '30px', fontSize: '0.9rem', opacity: 0.7 }}>
                 <span
                   style={{ cursor: 'pointer', textDecoration: 'underline' }}
                   onClick={() => changeView('CREDITS')}
@@ -660,7 +670,7 @@ function GameApp() {
                   : (result.impostorCaught ? t('result.youCaughtThem') : t('result.theyGotAway'))}
               </h1>
               <p>{t('result.monkeyWas')}</p>
-              <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{result.impostorName}</div>
+              <div className="result-impostor-name">{result.impostorName}</div>
               <hr style={{ borderTop: '2px dashed var(--ink)', margin: '20px 0' }} />
               <p>{t('result.questionWas')}</p>
               <div className="result-question">"{resultQuestionText}"</div>
@@ -710,7 +720,12 @@ function GameApp() {
         </PaperBoard>
       </div>
 
-      <DoodleMonkey view={view} winState={didIWin} showAnimations={showAnimations} />
+      <DoodleMonkey
+        view={view}
+        winState={didIWin}
+        showAnimations={showAnimations}
+        hiddenOnMobile={isMobile || isLandscapePhone}
+      />
 
       <Toast
         message={toast.message}

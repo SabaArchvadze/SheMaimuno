@@ -6,9 +6,11 @@ import paperIn from '../assets/paperIn.webm';
 import paperOut from '../assets/paperOut.webm';
 import paperStill from '../assets/paperStill.png';
 
-const DURATION = 1500; 
+const DURATION = 1500;
 
-export default function PaperBoard({ children, view, showAnimations }) {
+export default function PaperBoard({ children, view, showAnimations, isMobileLite = false }) {
+  const usePaperVideo = showAnimations && !isMobileLite;
+
   const [displayedView, setDisplayedView] = useState(view);
   const [displayContent, setDisplayContent] = useState(children);
 
@@ -34,7 +36,7 @@ export default function PaperBoard({ children, view, showAnimations }) {
       const isInitialRefresh = !hasInitialTransitionedRef.current && elapsedSinceMount < 1500;
       hasInitialTransitionedRef.current = true;
 
-      if (isInitialRefresh || !showAnimations) {
+      if (isInitialRefresh || !usePaperVideo) {
         setDisplayedView(view);
         setDisplayContent(children);
         setAnimState('STATIC');
@@ -46,7 +48,7 @@ export default function PaperBoard({ children, view, showAnimations }) {
     } else if (view === displayedView && animState === 'STATIC') {
       setDisplayContent(children);
     }
-  }, [view, displayedView, animState, children, showAnimations]);
+  }, [view, displayedView, animState, children, usePaperVideo]);
 
   useEffect(() => {
     return () => {
@@ -66,7 +68,7 @@ export default function PaperBoard({ children, view, showAnimations }) {
     crumbleTimerRef.current = setTimeout(() => {
       setDisplayedView(latestViewRef.current);
       setDisplayContent(latestChildrenRef.current);
-      
+
       setAnimState('UNCRUMPLING');
       setVideoKey(prev => prev + 1);
 
@@ -75,21 +77,22 @@ export default function PaperBoard({ children, view, showAnimations }) {
         setIsVideoPlaying(false);
         setDisplayedView(latestViewRef.current);
         setDisplayContent(latestChildrenRef.current);
-      }, DURATION); 
-
-    }, DURATION); 
+      }, DURATION);
+    }, DURATION);
   };
 
   return (
-    <div className={`paper-board-container ${animState.toLowerCase()} ${!showAnimations ? 'simple-mode' : ''}`}>
-
+    <div
+      className={`paper-board-container ${animState.toLowerCase()} ${!usePaperVideo ? 'simple-mode' : ''} ${isMobileLite ? 'mobile-lite' : ''}`}
+      data-view={view}
+    >
       <img
         src={paperStill}
-        alt="Paper Background"
+        alt=""
         className={`paper-frame-img ${isVideoPlaying ? 'invisible' : ''}`}
       />
 
-      {animState !== 'STATIC' && showAnimations && (
+      {animState !== 'STATIC' && usePaperVideo && (
         <video
           key={videoKey}
           src={animState === 'CRUMPLING' ? paperOut : paperIn}
@@ -106,7 +109,6 @@ export default function PaperBoard({ children, view, showAnimations }) {
       <div className={`paper-content-overlay ${animState !== 'STATIC' ? 'hidden' : ''}`}>
         {displayContent}
       </div>
-
     </div>
   );
 }

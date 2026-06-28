@@ -27,6 +27,10 @@ export const STRINGS = {
     ui: {
       animations: 'ანიმაციები',
     },
+    mobile: {
+      rotateTitle: 'შეატრიალე ტელეფონი',
+      rotateBody: 'თამაში უკეთ ჩანს თარაზულ რეჟიმში. გადაატრიალე მოწყობილობა.',
+    },
     game: {
       readyCounter: '{x}/{total} მზადაა', 
       writePlaceholder: 'დაწერე შენი პასუხი...',
@@ -111,6 +115,10 @@ export const STRINGS = {
     },
     ui: {
       animations: 'Animations',
+    },
+    mobile: {
+      rotateTitle: 'Rotate your phone',
+      rotateBody: 'This game plays best in landscape. Turn your device sideways.',
     },
     game: {
       readyCounter: '{x}/{total} Ready',

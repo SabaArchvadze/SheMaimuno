@@ -1,4 +1,9 @@
-/* ─── Settings toolbar (theme / animations / language) ─── */
+/* ═══════════════════════════════════════════════════════════════
+   She Maimuno — mobile layout system
+   Desktop default lives in App.css + PaperBoard.css
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Settings toolbar ─── */
 .settings-toolbar {
   position: fixed;
   top: max(12px, env(safe-area-inset-top, 0px));
@@ -15,36 +20,45 @@
   pointer-events: auto;
 }
 
-/* ─── Result helpers ─── */
+.settings-toolbar.behind-rotate {
+  z-index: 9998;
+}
+
+/* ─── Shared helpers ─── */
 .game-question {
-  font-size: clamp(1.1rem, 4vw, 1.6rem);
-  line-height: 1.25;
-  margin: 0.5rem 0 1rem;
+  font-size: clamp(1rem, 2.8vw, 1.6rem);
+  line-height: 1.2;
+  margin: 0.25rem 0 0.5rem;
   padding: 0 4px;
   word-break: break-word;
 }
 
 .result-question {
-  font-size: clamp(1.1rem, 3.5vw, 1.5rem);
-  line-height: 1.3;
+  font-size: clamp(0.95rem, 2.5vw, 1.5rem);
+  line-height: 1.25;
   word-break: break-word;
+}
+
+.result-impostor-name {
+  font-size: clamp(1.1rem, 4vw, 2rem);
+  font-weight: bold;
 }
 
 .vote-results-mobile {
   display: none;
   width: 100%;
   max-width: 360px;
-  margin: 16px auto 0;
-  padding: 10px 12px;
+  margin: 8px auto 0;
+  padding: 8px 10px;
   text-align: left;
   background: rgba(255, 255, 255, 0.85);
   border: 2px dashed var(--ink);
-  border-radius: 12px;
+  border-radius: 10px;
 }
 
 .vote-results-mobile h3 {
-  margin: 0 0 8px;
-  font-size: 1rem;
+  margin: 0 0 6px;
+  font-size: 0.9rem;
   text-align: center;
 }
 
@@ -52,32 +66,61 @@ body.dark-mode .vote-results-mobile {
   background: rgba(30, 30, 30, 0.9);
 }
 
-/* ─── Tablet & phone ─── */
 @media (max-width: 900px) {
+  .vote-side-drawer {
+    display: none !important;
+  }
+
   .vote-results-mobile {
     display: block;
   }
 }
 
-@media (max-width: 768px) {
+/* Disable expensive paper throw animations on mobile-lite */
+.paper-board-container.mobile-lite.crumpling,
+.paper-board-container.mobile-lite.uncrumpling {
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .paper-board-container.crumpling,
+  .paper-board-container.uncrumpling {
+    animation: none !important;
+  }
+
+  .monkey-svg {
+    animation: none !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE PORTRAIT — compact home / credits; gameplay uses rotate overlay
+   ═══════════════════════════════════════════════════════════════ */
+@media (max-width: 900px) and (orientation: portrait) {
   html,
-  body {
-    overflow-y: auto;
-    overflow-x: hidden;
-    min-height: 100dvh;
-    -webkit-text-size-adjust: 100%;
+  body,
+  #root {
+    width: 100%;
+    height: 100%;
+    height: 100dvh;
+    overflow: hidden;
+    overscroll-behavior: none;
   }
 
   body {
-    align-items: flex-start;
+    align-items: stretch;
   }
 
-  .app-container {
+  .app-container.is-mobile {
+    width: 100%;
     max-width: 100%;
-    padding: max(8px, env(safe-area-inset-left, 0px)) max(8px, env(safe-area-inset-right, 0px));
-    padding-top: calc(max(72px, env(safe-area-inset-top, 0px) + 56px));
-    padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+    min-height: 100dvh;
+    height: 100dvh;
+    padding: calc(max(56px, env(safe-area-inset-top, 0px) + 48px)) max(10px, env(safe-area-inset-right, 0px))
+      max(12px, env(safe-area-inset-bottom, 0px)) max(10px, env(safe-area-inset-left, 0px));
     justify-content: flex-start;
+    overflow: hidden;
+    box-sizing: border-box;
   }
 
   .settings-toolbar {
@@ -87,51 +130,170 @@ body.dark-mode .vote-results-mobile {
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: flex-end;
-    align-items: center;
     gap: 6px;
   }
 
+  .app-container[data-view='HOME'] .title-img {
+    width: min(88vw, 340px);
+    margin-top: 0;
+    margin-bottom: -24px;
+  }
+
+  .app-container[data-view='HOME'] .paper-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+
+  .app-container[data-view='HOME'] .paper-board-container {
+    width: 100%;
+    max-width: 100%;
+    aspect-ratio: auto;
+    min-height: 0;
+    height: auto;
+    max-height: calc(100dvh - 200px);
+  }
+
+  .app-container[data-view='HOME'] .paper-frame-img {
+    top: 0;
+    left: 0;
+    scale: 1.15;
+  }
+
+  .app-container[data-view='HOME'] .paper-content-overlay {
+    width: 78%;
+    height: auto;
+    min-height: 55%;
+    max-height: 70%;
+    overflow: hidden;
+    justify-content: center;
+    padding: 4px;
+  }
+
+  .app-container[data-view='HOME'] input {
+    width: 100%;
+    font-size: 1.15rem;
+    margin: 8px auto;
+    padding: 8px;
+  }
+
+  .app-container[data-view='HOME'] .btn-doodle {
+    font-size: 1rem;
+    padding: 8px 12px;
+    min-height: 40px;
+    width: 100%;
+    max-width: 260px;
+    margin: 6px auto;
+  }
+
+  .app-container[data-view='HOME'] .home-or {
+    margin: 10px 0 !important;
+    font-size: 0.95rem;
+  }
+
+  .app-container[data-view='CREDITS'] .paper-board-container {
+    max-height: calc(100dvh - 80px);
+  }
+
+  .app-container[data-view='CREDITS'] .paper-content-overlay {
+    width: 85%;
+    max-height: 75%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    justify-content: flex-start;
+    font-size: 0.9rem;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE LANDSCAPE — primary game surface (fixed viewport, no scroll)
+   ═══════════════════════════════════════════════════════════════ */
+@media (max-width: 950px) and (orientation: landscape) {
+  html,
+  body,
+  #root {
+    width: 100%;
+    height: 100%;
+    height: 100dvh;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  body {
+    align-items: stretch;
+  }
+
+  .app-container.is-landscape-phone {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    max-width: 100%;
+    height: 100dvh;
+    padding: max(4px, env(safe-area-inset-top, 0px)) max(6px, env(safe-area-inset-right, 0px))
+      max(4px, env(safe-area-inset-bottom, 0px)) max(6px, env(safe-area-inset-left, 0px));
+    margin: 0;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+
+  .settings-toolbar {
+    top: max(4px, env(safe-area-inset-top, 0px));
+    right: max(4px, env(safe-area-inset-right, 0px));
+    flex-direction: row;
+    gap: 4px;
+  }
+
   .doodle-switch {
-    --switch-width: 52px;
-    --switch-height: 28px;
-    --knob-size: 17px;
+    --switch-width: 46px;
+    --switch-height: 24px;
+    --knob-size: 15px;
     --border-thickness: 2px;
   }
 
   .switch__input:checked:after {
-    transform: translate(22px, -50%);
+    transform: translate(19px, -50%);
   }
 
   .anim-toggle-container {
-    padding: 6px 10px;
-    gap: 6px;
-    border-radius: 10px;
+    padding: 4px 6px;
+    border-radius: 8px;
   }
 
   .anim-label {
-    font-size: 0.8rem;
+    display: none;
   }
 
   .anim-checkbox {
-    width: 22px;
-    height: 22px;
+    width: 20px;
+    height: 20px;
   }
 
   .lang-toggle__btn {
-    padding: 8px 12px;
-    min-width: 40px;
-    min-height: 36px;
-    font-size: 0.88rem;
+    padding: 5px 10px;
+    min-width: 36px;
+    min-height: 32px;
+    font-size: 0.8rem;
   }
 
   .title-img {
-    width: min(92vw, 420px);
-    margin-top: -20px;
-    margin-bottom: -40px;
+    display: none;
+  }
+
+  .title-img.hidden {
+    display: none;
   }
 
   .paper-wrapper {
     width: 100%;
+    height: 100%;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
   }
 
   .paper-wrapper.expanded {
@@ -139,158 +301,339 @@ body.dark-mode .vote-results-mobile {
   }
 
   .paper-board-container {
+    position: relative;
+    width: min(92vw, calc((100dvh - 36px) * 1.55));
+    height: calc(100dvh - max(36px, env(safe-area-inset-top, 0px) + env(safe-area-inset-bottom, 0px) + 28px));
+    max-width: none;
+    max-height: none;
     aspect-ratio: auto;
-    width: 100%;
-    max-width: 100%;
-    min-height: min(78dvh, 640px);
-    margin-bottom: 8px;
+    margin: 0 auto;
   }
 
   .paper-frame-img {
-    top: 10px;
-    left: 0;
-    scale: 1.45;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    scale: 1.08;
+    transform: translate(-50%, -50%) scale(1.08);
+    object-fit: contain;
   }
 
   .paper-content-overlay {
-    width: 82%;
-    height: auto;
-    min-height: 72%;
-    max-height: 78%;
-    overflow-x: hidden;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-    padding: 4px 2px 8px;
-    justify-content: flex-start;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 62%;
+    height: 58%;
+    max-height: 58%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 4px;
+    box-sizing: border-box;
   }
 
   .leave-game-btn {
-    top: 2px;
-    left: 2px;
-    width: 44px;
-    height: 44px;
+    top: 4%;
+    left: 2%;
+    width: 36px;
+    height: 36px;
     z-index: 130;
   }
 
   .leave-game-btn svg {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
   }
 
   .ready-counter {
-    top: 2px;
-    right: 2px;
+    top: 4%;
+    right: 2%;
     left: auto;
-    font-size: 0.82rem;
-    padding: 6px 10px;
-    max-width: 45%;
-    line-height: 1.1;
-    text-align: center;
+    font-size: 0.7rem;
+    padding: 4px 8px;
+    max-width: 42%;
   }
 
-  .voting-title {
-    margin: 0 0 6px;
-    font-size: clamp(1.2rem, 5vw, 1.6rem);
+  /* ─── HOME landscape ─── */
+  .app-container[data-view='HOME'] .paper-content-overlay {
+    width: 58%;
+    height: 62%;
   }
 
-  .voting-question {
-    margin: 0 0 12px;
+  .app-container[data-view='HOME'] input {
+    width: 100%;
     font-size: 1rem;
-    padding: 0 4px;
+    margin: 4px auto;
+    padding: 6px;
   }
 
-  .vote-grid-2,
-  .vote-grid-3 {
+  .app-container[data-view='HOME'] .btn-doodle {
+    font-size: 0.95rem;
+    padding: 6px 10px;
+    min-height: 36px;
+    width: 100%;
+    max-width: 220px;
+    margin: 4px auto;
+  }
+
+  .app-container[data-view='HOME'] .home-or {
+    margin: 6px 0 !important;
+    font-size: 0.85rem;
+  }
+
+  .app-container[data-view='HOME'] .home-credits-link {
+    margin-top: 8px !important;
+    font-size: 0.75rem !important;
+  }
+
+  /* ─── LOBBY landscape ─── */
+  .app-container[data-view='LOBBY'] .paper-content-overlay {
+    justify-content: flex-start;
+    padding-top: 6%;
+  }
+
+  .app-container[data-view='LOBBY'] h2 {
+    font-size: 1rem;
+    margin: 0 0 4px;
+  }
+
+  .app-container[data-view='LOBBY'] .btn-link {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    margin: 2px 0 6px;
+  }
+
+  .app-container[data-view='LOBBY'] .lobby-player-grid {
+    margin: 4px 0 !important;
+    max-height: 38%;
+    overflow: hidden;
+  }
+
+  .app-container[data-view='LOBBY'] .lobby-grid-2,
+  .app-container[data-view='LOBBY'] .lobby-grid-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2px 8px;
+  }
+
+  .app-container[data-view='LOBBY'] .player-row {
+    font-size: 0.78rem;
+    padding: 3px 2px;
+    min-height: 32px;
+  }
+
+  .app-container[data-view='LOBBY'] .player-avatar {
+    width: 22px;
+    height: 22px;
+    margin-right: 4px;
+  }
+
+  .app-container[data-view='LOBBY'] .btn-doodle {
+    font-size: 0.9rem;
+    padding: 6px 12px;
+    min-height: 36px;
+    width: auto;
+    max-width: 200px;
+    margin: 4px auto;
+  }
+
+  .app-container[data-view='LOBBY'] .min-players-note {
+    font-size: 0.72rem;
+    margin-top: 2px;
+  }
+
+  .app-container[data-view='LOBBY'] p {
+    font-size: 0.85rem;
+    margin: 4px 0;
+  }
+
+  /* ─── GAME / WAITING landscape ─── */
+  .app-container[data-view='GAME'] .paper-content-overlay,
+  .app-container[data-view='WAITING'] .paper-content-overlay {
+    justify-content: center;
+  }
+
+  .app-container[data-view='GAME'] .game-question,
+  .app-container[data-view='WAITING'] h2 {
+    font-size: clamp(0.85rem, 2.2vh, 1.1rem);
+    margin: 0 0 4px;
+  }
+
+  .app-container[data-view='GAME'] .speech-bubble {
+    margin: 4px 0;
+    padding: 6px 8px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .app-container[data-view='GAME'] .speech-bubble input {
+    font-size: 0.95rem;
+    padding: 4px;
+    width: 100% !important;
+  }
+
+  .app-container[data-view='GAME'] .btn-doodle,
+  .app-container[data-view='WAITING'] .btn-doodle {
+    font-size: 0.85rem;
+    padding: 5px 12px;
+    min-height: 34px;
+    margin: 4px auto;
+    width: auto;
+    max-width: 180px;
+  }
+
+  .app-container[data-view='WAITING'] p {
+    font-size: 0.8rem;
+    margin: 4px 0;
+  }
+
+  /* ─── VOTING landscape ─── */
+  .app-container[data-view='VOTING'] .paper-content-overlay {
+    justify-content: flex-start;
+    padding-top: 8%;
+    height: 62%;
+  }
+
+  .app-container[data-view='VOTING'] .voting-title {
+    margin: 0 0 2px;
+    font-size: clamp(0.9rem, 2.5vh, 1.1rem);
+  }
+
+  .app-container[data-view='VOTING'] .voting-question {
+    margin: 0 0 6px;
+    font-size: 0.75rem;
+    line-height: 1.15;
+  }
+
+  .app-container[data-view='VOTING'] .vote-grid {
+    gap: 4px;
+    width: 100%;
+    max-height: 72%;
+    overflow: hidden;
+  }
+
+  .app-container[data-view='VOTING'] .vote-grid-1 {
     grid-template-columns: 1fr;
   }
 
-  .vote-grid-3 .vote-card:nth-child(6):last-child,
-  .vote-grid-3 .vote-card:nth-child(6):nth-last-child(2),
-  .vote-grid-3 .vote-card:nth-child(7):last-child {
+  .app-container[data-view='VOTING'] .vote-grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .app-container[data-view='VOTING'] .vote-grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .app-container[data-view='VOTING'] .vote-card {
+    padding: 4px 6px;
+    margin: 0;
+    min-height: 0;
+    font-size: 0.72rem;
+  }
+
+  .app-container[data-view='VOTING'] .vote-answer-text {
+    font-size: 0.72rem;
+    line-height: 1.1;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .app-container[data-view='VOTING'] .vote-avatar {
+    width: 18px;
+    height: 18px;
+    margin-right: 4px;
+  }
+
+  .app-container[data-view='VOTING'] .vote-card strong {
+    font-size: 0.72rem;
+  }
+
+  .app-container[data-view='VOTING'] .vote-hint {
+    font-size: 0.6rem;
+  }
+
+  .app-container[data-view='VOTING'] .vote-grid-3 .vote-card:nth-child(6):last-child,
+  .app-container[data-view='VOTING'] .vote-grid-3 .vote-card:nth-child(6):nth-last-child(2),
+  .app-container[data-view='VOTING'] .vote-grid-3 .vote-card:nth-child(7):last-child {
     grid-column: auto;
   }
 
-  .vote-card {
-    min-height: 44px;
-    padding: 12px;
-    margin: 0;
-    -webkit-tap-highlight-color: transparent;
+  /* ─── RESULT landscape ─── */
+  .app-container[data-view='RESULT'] .paper-content-overlay {
+    justify-content: flex-start;
+    padding-top: 6%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
-  .vote-card:active {
-    background: #f0f0f0;
-    transform: scale(0.99);
+  .app-container[data-view='RESULT'] h1 {
+    font-size: clamp(0.95rem, 3vh, 1.25rem) !important;
+    margin: 0 0 4px;
+    line-height: 1.15;
   }
 
-  .lobby-grid-2,
-  .lobby-grid-3 {
-    grid-template-columns: 1fr;
-    gap: 6px;
+  .app-container[data-view='RESULT'] p {
+    font-size: 0.75rem;
+    margin: 2px 0;
   }
 
-  .player-row {
-    font-size: 1rem;
-    padding: 8px 4px;
-    min-height: 44px;
+  .app-container[data-view='RESULT'] .result-impostor-name {
+    font-size: clamp(0.9rem, 3vh, 1.2rem);
   }
 
-  .player-avatar {
-    width: 32px;
-    height: 32px;
+  .app-container[data-view='RESULT'] .result-question {
+    font-size: 0.8rem;
   }
 
-  .btn-doodle {
-    font-size: 1.15rem;
-    padding: 10px 16px;
-    min-height: 44px;
-    width: min(100%, 320px);
-    margin: 8px auto;
+  .app-container[data-view='RESULT'] hr {
+    margin: 6px 0 !important;
   }
 
-  .btn-compact {
-    width: min(100%, 280px);
-    display: flex;
+  .app-container[data-view='RESULT'] .vote-results-mobile {
+    margin-top: 6px;
+    padding: 6px 8px;
+    font-size: 0.72rem;
   }
 
-  .result-action-row {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    width: 100%;
+  .app-container[data-view='RESULT'] .vote-results-mobile h3 {
+    font-size: 0.8rem;
   }
 
-  .speech-bubble {
-    width: 100%;
-    box-sizing: border-box;
-    margin: 10px 0;
-    padding: 10px;
-  }
-
-  .speech-bubble input {
-    width: 100%;
-    font-size: 1.25rem;
-    padding: 8px 4px;
-  }
-
-  input {
-    width: min(100%, 320px);
-    font-size: 1.35rem;
-  }
-
-  .min-players-note {
-    font-size: 0.88rem;
-    padding: 0 8px;
-  }
-
-  .kick-confirm-inline {
+  .app-container[data-view='RESULT'] .result-action-row {
+    flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
-    text-align: center;
+    gap: 6px;
+    margin-top: 6px;
   }
 
-  /* Touch devices: kick overlay visible without hover */
+  .app-container[data-view='RESULT'] .btn-compact {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    min-height: 32px;
+    width: auto;
+    max-width: none;
+    margin: 0;
+  }
+
+  /* ─── CREDITS landscape ─── */
+  .app-container[data-view='CREDITS'] .paper-content-overlay {
+    justify-content: flex-start;
+    overflow-y: auto;
+    font-size: 0.8rem;
+  }
+
+  .app-container[data-view='CREDITS'] h1 {
+    font-size: 1.2rem;
+  }
+
+  /* Touch kick */
   @media (hover: none) and (pointer: coarse) {
     .kick-overlay-btn {
       opacity: 0.45;
@@ -302,62 +645,16 @@ body.dark-mode .vote-results-mobile {
       background: rgba(0, 0, 0, 0.25);
     }
   }
-
-  .monkey-wrapper {
-    opacity: 0.35;
-    transform: scale(0.75);
-    bottom: max(8px, env(safe-area-inset-bottom, 0px));
-  }
 }
 
-@media (max-width: 380px) {
-  .settings-toolbar {
-    gap: 4px;
-  }
-
-  .anim-label {
-    display: none;
-  }
-
-  .anim-toggle-container {
-    padding: 8px;
-  }
-
-  .lang-toggle__btn {
-    padding: 8px 10px;
-    min-width: 36px;
-  }
-
+/* Very short landscape (e.g. iPhone SE) */
+@media (max-height: 380px) and (orientation: landscape) {
   .paper-content-overlay {
-    width: 86%;
+    width: 66% !important;
+    height: 64% !important;
   }
 
-  .ready-counter {
-    font-size: 0.75rem;
-    padding: 5px 8px;
-  }
-}
-
-/* Landscape phones: give paper more vertical room */
-@media (max-width: 900px) and (orientation: landscape) {
-  .app-container {
-    padding-top: max(8px, env(safe-area-inset-top, 0px));
-  }
-
-  .settings-toolbar {
-    flex-direction: row;
-    gap: 6px;
-  }
-
-  .paper-board-container {
-    min-height: min(88dvh, 520px);
-  }
-
-  .paper-content-overlay {
-    max-height: 82%;
-  }
-
-  .title-img.hidden {
-    display: none;
+  .app-container[data-view='VOTING'] .vote-grid-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
