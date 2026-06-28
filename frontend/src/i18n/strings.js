@@ -29,7 +29,7 @@ export const STRINGS = {
     },
     mobile: {
       rotateTitle: 'შეატრიალე ტელეფონი',
-      rotateBody: 'თამაში უკეთ ჩანს თარაზულ რეჟიმში. გადაატრიალე მოწყობილობა.',
+      rotateBody: 'თამაში უკეთ ჩანს ჰორიზონტალურ რეჟიმში. გადაატრიალე ტელეფონი.',
     },
     game: {
       readyCounter: '{x}/{total} მზადაა', 

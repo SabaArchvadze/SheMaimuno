@@ -1,9 +1,10 @@
 /* ═══════════════════════════════════════════════════════════════
-   She Maimuno — mobile layout system
-   Desktop default lives in App.css + PaperBoard.css
+   She Maimuno — mobile hybrid layout
+   Desktop: App.css + PaperBoard.css (unchanged)
+   Mobile: compact HUD + lightweight game panel (no giant paper image)
    ═══════════════════════════════════════════════════════════════ */
 
-/* ─── Settings toolbar ─── */
+/* ─── Desktop settings toolbar ─── */
 .settings-toolbar {
   position: fixed;
   top: max(12px, env(safe-area-inset-top, 0px));
@@ -76,12 +77,6 @@ body.dark-mode .vote-results-mobile {
   }
 }
 
-/* Disable expensive paper throw animations on mobile-lite */
-.paper-board-container.mobile-lite.crumpling,
-.paper-board-container.mobile-lite.uncrumpling {
-  animation: none !important;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .paper-board-container.crumpling,
   .paper-board-container.uncrumpling {
@@ -91,12 +86,16 @@ body.dark-mode .vote-results-mobile {
   .monkey-svg {
     animation: none !important;
   }
+
+  .mobile-panel-content {
+    transition: none !important;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   MOBILE PORTRAIT — compact home / credits; gameplay uses rotate overlay
+   MOBILE HYBRID SHELL — fixed viewport, HUD + game panel
    ═══════════════════════════════════════════════════════════════ */
-@media (max-width: 900px) and (orientation: portrait) {
+@media (max-width: 950px) {
   html,
   body,
   #root {
@@ -111,432 +110,458 @@ body.dark-mode .vote-results-mobile {
     align-items: stretch;
   }
 
-  .app-container.is-mobile {
-    width: 100%;
-    max-width: 100%;
-    min-height: 100dvh;
-    height: 100dvh;
-    padding: calc(max(56px, env(safe-area-inset-top, 0px) + 48px)) max(10px, env(safe-area-inset-right, 0px))
-      max(12px, env(safe-area-inset-bottom, 0px)) max(10px, env(safe-area-inset-left, 0px));
-    justify-content: flex-start;
-    overflow: hidden;
-    box-sizing: border-box;
-  }
-
-  .settings-toolbar {
-    top: max(8px, env(safe-area-inset-top, 0px));
-    right: max(8px, env(safe-area-inset-right, 0px));
-    left: max(8px, env(safe-area-inset-left, 0px));
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    gap: 6px;
-  }
-
-  .app-container[data-view='HOME'] .title-img {
-    width: min(88vw, 340px);
-    margin-top: 0;
-    margin-bottom: -24px;
-  }
-
-  .app-container[data-view='HOME'] .paper-wrapper {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    width: 100%;
-  }
-
-  .app-container[data-view='HOME'] .paper-board-container {
-    width: 100%;
-    max-width: 100%;
-    aspect-ratio: auto;
-    min-height: 0;
-    height: auto;
-    max-height: calc(100dvh - 200px);
-  }
-
-  .app-container[data-view='HOME'] .paper-frame-img {
-    top: 0;
-    left: 0;
-    scale: 1.15;
-  }
-
-  .app-container[data-view='HOME'] .paper-content-overlay {
-    width: 78%;
-    height: auto;
-    min-height: 55%;
-    max-height: 70%;
-    overflow: hidden;
-    justify-content: center;
-    padding: 4px;
-  }
-
-  .app-container[data-view='HOME'] input {
-    width: 100%;
-    font-size: 1.15rem;
-    margin: 8px auto;
-    padding: 8px;
-  }
-
-  .app-container[data-view='HOME'] .btn-doodle {
-    font-size: 1rem;
-    padding: 8px 12px;
-    min-height: 40px;
-    width: 100%;
-    max-width: 260px;
-    margin: 6px auto;
-  }
-
-  .app-container[data-view='HOME'] .home-or {
-    margin: 10px 0 !important;
-    font-size: 0.95rem;
-  }
-
-  .app-container[data-view='CREDITS'] .paper-board-container {
-    max-height: calc(100dvh - 80px);
-  }
-
-  .app-container[data-view='CREDITS'] .paper-content-overlay {
-    width: 85%;
-    max-height: 75%;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    justify-content: flex-start;
-    font-size: 0.9rem;
-  }
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   MOBILE LANDSCAPE — primary game surface (fixed viewport, no scroll)
-   ═══════════════════════════════════════════════════════════════ */
-@media (max-width: 950px) and (orientation: landscape) {
-  html,
-  body,
-  #root {
-    width: 100%;
-    height: 100%;
-    height: 100dvh;
-    overflow: hidden;
-    overscroll-behavior: none;
-  }
-
-  body {
-    align-items: stretch;
-  }
-
-  .app-container.is-landscape-phone {
+  .app-container.use-mobile-panel {
     position: fixed;
     inset: 0;
     width: 100%;
     max-width: 100%;
     height: 100dvh;
+    min-height: 100dvh;
+    margin: 0;
     padding: max(4px, env(safe-area-inset-top, 0px)) max(6px, env(safe-area-inset-right, 0px))
       max(4px, env(safe-area-inset-bottom, 0px)) max(6px, env(safe-area-inset-left, 0px));
-    margin: 0;
-    justify-content: center;
-    align-items: center;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
     overflow: hidden;
     box-sizing: border-box;
-  }
-
-  .settings-toolbar {
-    top: max(4px, env(safe-area-inset-top, 0px));
-    right: max(4px, env(safe-area-inset-right, 0px));
-    flex-direction: row;
     gap: 4px;
   }
 
-  .doodle-switch {
-    --switch-width: 46px;
+  /* ─── Compact top HUD ─── */
+  .mobile-hud {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 36px;
+    padding: 2px 0;
+    z-index: 10000;
+  }
+
+  .mobile-hud-back {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.85);
+    border: 2px dashed var(--ink);
+    border-radius: 50%;
+    padding: 0;
+    opacity: 0.9;
+    transition: opacity 0.15s;
+  }
+
+  body.dark-mode .mobile-hud-back {
+    background: rgba(40, 40, 40, 0.9);
+  }
+
+  .mobile-hud-back--spacer {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .mobile-hud-center {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+    font-family: 'Mandys Sketch', cursive;
+    font-size: 0.85rem;
+    line-height: 1.1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-hud-room,
+  .mobile-hud-status {
+    display: inline-block;
+    padding: 4px 10px;
+    border: 2px dashed var(--ink);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.75);
+    transform: rotate(-0.5deg);
+  }
+
+  body.dark-mode .mobile-hud-room,
+  body.dark-mode .mobile-hud-status {
+    background: rgba(40, 40, 40, 0.85);
+  }
+
+  .mobile-hud-settings {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .mobile-hud-settings .doodle-switch {
+    --switch-width: 44px;
     --switch-height: 24px;
     --knob-size: 15px;
     --border-thickness: 2px;
   }
 
-  .switch__input:checked:after {
-    transform: translate(19px, -50%);
+  .mobile-hud-settings .switch__input:checked:after {
+    transform: translate(18px, -50%);
   }
 
-  .anim-toggle-container {
+  .mobile-hud-settings .anim-toggle-container {
     padding: 4px 6px;
     border-radius: 8px;
   }
 
-  .anim-label {
+  .mobile-hud-settings .anim-label {
     display: none;
   }
 
-  .anim-checkbox {
+  .mobile-hud-settings .anim-checkbox {
     width: 20px;
     height: 20px;
   }
 
-  .lang-toggle__btn {
-    padding: 5px 10px;
-    min-width: 36px;
-    min-height: 32px;
-    font-size: 0.8rem;
+  .mobile-hud-settings .lang-toggle__btn {
+    padding: 5px 9px;
+    min-width: 34px;
+    min-height: 30px;
+    font-size: 0.78rem;
   }
 
-  .title-img {
-    display: none;
+  /* ─── Stage: panel fills remaining viewport ─── */
+  .app-container.use-mobile-panel .paper-wrapper {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    transform: none !important;
+    transition: none;
   }
 
-  .title-img.hidden {
-    display: none;
+  .app-container.use-mobile-panel .paper-wrapper.expanded {
+    transform: none !important;
   }
 
-  .paper-wrapper {
+  .app-container.use-mobile-panel .mobile-game-panel {
     width: 100%;
     height: 100%;
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     min-height: 0;
   }
 
-  .paper-wrapper.expanded {
-    transform: none;
+  .app-container.use-mobile-panel .mobile-panel-content {
+    overflow: hidden;
+    padding: 10px 12px;
   }
 
-  .paper-board-container {
-    position: relative;
-    width: min(92vw, calc((100dvh - 36px) * 1.55));
-    height: calc(100dvh - max(36px, env(safe-area-inset-top, 0px) + env(safe-area-inset-bottom, 0px) + 28px));
-    max-width: none;
-    max-height: none;
-    aspect-ratio: auto;
-    margin: 0 auto;
-  }
-
-  .paper-frame-img {
-    top: 50%;
-    left: 50%;
+  .view-panel {
     width: 100%;
     height: 100%;
-    scale: 1.08;
-    transform: translate(-50%, -50%) scale(1.08);
-    object-fit: contain;
-  }
-
-  .paper-content-overlay {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 62%;
-    height: 58%;
-    max-height: 58%;
-    overflow: hidden;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 2px 4px;
     box-sizing: border-box;
   }
 
-  .leave-game-btn {
-    top: 4%;
-    left: 2%;
-    width: 36px;
-    height: 36px;
-    z-index: 130;
-  }
-
-  .leave-game-btn svg {
-    width: 20px;
-    height: 20px;
-  }
-
-  .ready-counter {
-    top: 4%;
-    right: 2%;
-    left: auto;
-    font-size: 0.7rem;
-    padding: 4px 8px;
-    max-width: 42%;
-  }
-
-  /* ─── HOME landscape ─── */
-  .app-container[data-view='HOME'] .paper-content-overlay {
-    width: 58%;
-    height: 62%;
-  }
-
-  .app-container[data-view='HOME'] input {
-    width: 100%;
-    font-size: 1rem;
-    margin: 4px auto;
-    padding: 6px;
-  }
-
-  .app-container[data-view='HOME'] .btn-doodle {
-    font-size: 0.95rem;
-    padding: 6px 10px;
-    min-height: 36px;
-    width: 100%;
-    max-width: 220px;
-    margin: 4px auto;
-  }
-
-  .app-container[data-view='HOME'] .home-or {
-    margin: 6px 0 !important;
-    font-size: 0.85rem;
-  }
-
-  .app-container[data-view='HOME'] .home-credits-link {
-    margin-top: 8px !important;
-    font-size: 0.75rem !important;
-  }
-
-  /* ─── LOBBY landscape ─── */
-  .app-container[data-view='LOBBY'] .paper-content-overlay {
+  .view-panel.view-lobby,
+  .view-panel.view-voting,
+  .view-panel.view-result,
+  .view-panel.view-credits {
     justify-content: flex-start;
-    padding-top: 6%;
-  }
-
-  .app-container[data-view='LOBBY'] h2 {
-    font-size: 1rem;
-    margin: 0 0 4px;
-  }
-
-  .app-container[data-view='LOBBY'] .btn-link {
-    font-size: 0.75rem;
-    padding: 4px 10px;
-    margin: 2px 0 6px;
-  }
-
-  .app-container[data-view='LOBBY'] .lobby-player-grid {
-    margin: 4px 0 !important;
-    max-height: 38%;
     overflow: hidden;
   }
 
-  .app-container[data-view='LOBBY'] .lobby-grid-2,
-  .app-container[data-view='LOBBY'] .lobby-grid-3 {
+  /* Hide desktop-only chrome inside mobile panel */
+  .app-container.use-mobile-panel .leave-game-btn,
+  .app-container.use-mobile-panel .ready-counter {
+    display: none !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE PORTRAIT — home / credits; gameplay shows rotate overlay
+   ═══════════════════════════════════════════════════════════════ */
+@media (max-width: 900px) and (orientation: portrait) {
+  .app-container.use-mobile-panel[data-view='HOME'] .title-img {
+    display: block;
+    width: min(82vw, 300px);
+    margin: 0 auto -16px;
+    flex-shrink: 0;
+  }
+
+  .app-container.use-mobile-panel[data-view='HOME'] .paper-wrapper {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .app-container.use-mobile-panel[data-view='HOME'] .view-home {
+    justify-content: center;
+    gap: 4px;
+  }
+
+  .app-container.use-mobile-panel[data-view='HOME'] input {
+    width: 100%;
+    max-width: 280px;
+    font-size: 1.1rem;
+    margin: 6px auto;
+    padding: 8px;
+  }
+
+  .app-container.use-mobile-panel[data-view='HOME'] .btn-doodle {
+    font-size: 1rem;
+    padding: 8px 12px;
+    min-height: 40px;
+    width: 100%;
+    max-width: 260px;
+    margin: 5px auto;
+  }
+
+  .app-container.use-mobile-panel[data-view='HOME'] .home-or {
+    margin: 8px 0 !important;
+    font-size: 0.95rem;
+  }
+
+  .app-container.use-mobile-panel[data-view='HOME'] .home-credits-link {
+    margin-top: 12px !important;
+    font-size: 0.85rem !important;
+  }
+
+  .app-container.use-mobile-panel[data-view='CREDITS'] .view-credits {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    justify-content: flex-start;
+    font-size: 0.9rem;
+    text-align: left;
+  }
+
+  .app-container.use-mobile-panel[data-view='CREDITS'] .view-credits h1 {
+    text-align: center;
+    width: 100%;
+  }
+
+  .app-container.use-mobile-panel:not([data-view='HOME']):not([data-view='CREDITS']) .title-img {
+    display: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE LANDSCAPE — primary gameplay surface
+   ═══════════════════════════════════════════════════════════════ */
+@media (max-width: 950px) and (orientation: landscape) {
+  .app-container.use-mobile-panel .title-img {
+    display: none !important;
+  }
+
+  .app-container.use-mobile-panel .mobile-hud {
+    min-height: 32px;
+  }
+
+  .app-container.use-mobile-panel .mobile-hud-back {
+    width: 30px;
+    height: 30px;
+  }
+
+  .app-container.use-mobile-panel .mobile-hud-center {
+    font-size: 0.78rem;
+  }
+
+  .app-container.use-mobile-panel .mobile-panel-content {
+    padding: 6px 10px;
+  }
+
+  /* ─── HOME landscape ─── */
+  .app-container.use-mobile-panel[data-view='HOME'] .view-home {
+    justify-content: center;
+    gap: 2px;
+  }
+
+  .app-container.use-mobile-panel[data-view='HOME'] input {
+    width: 100%;
+    max-width: 240px;
+    font-size: 0.95rem;
+    margin: 3px auto;
+    padding: 5px;
+  }
+
+  .app-container.use-mobile-panel[data-view='HOME'] .btn-doodle {
+    font-size: 0.9rem;
+    padding: 5px 10px;
+    min-height: 34px;
+    width: 100%;
+    max-width: 210px;
+    margin: 3px auto;
+  }
+
+  .app-container.use-mobile-panel[data-view='HOME'] .home-or {
+    margin: 4px 0 !important;
+    font-size: 0.8rem;
+  }
+
+  .app-container.use-mobile-panel[data-view='HOME'] .home-credits-link {
+    margin-top: 6px !important;
+    font-size: 0.72rem !important;
+  }
+
+  /* ─── LOBBY ─── */
+  .app-container.use-mobile-panel[data-view='LOBBY'] .view-lobby h2 {
+    display: none;
+  }
+
+  .app-container.use-mobile-panel[data-view='LOBBY'] .btn-link {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    margin: 0 0 4px;
+    flex-shrink: 0;
+  }
+
+  .app-container.use-mobile-panel[data-view='LOBBY'] .lobby-player-grid {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    margin: 4px 0 !important;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    align-content: start;
+  }
+
+  .app-container.use-mobile-panel[data-view='LOBBY'] .lobby-grid-2,
+  .app-container.use-mobile-panel[data-view='LOBBY'] .lobby-grid-3 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 2px 8px;
   }
 
-  .app-container[data-view='LOBBY'] .player-row {
-    font-size: 0.78rem;
+  .app-container.use-mobile-panel[data-view='LOBBY'] .player-row {
+    font-size: 0.76rem;
     padding: 3px 2px;
-    min-height: 32px;
+    min-height: 30px;
   }
 
-  .app-container[data-view='LOBBY'] .player-avatar {
-    width: 22px;
-    height: 22px;
+  .app-container.use-mobile-panel[data-view='LOBBY'] .player-avatar {
+    width: 20px;
+    height: 20px;
     margin-right: 4px;
   }
 
-  .app-container[data-view='LOBBY'] .btn-doodle {
-    font-size: 0.9rem;
-    padding: 6px 12px;
-    min-height: 36px;
-    width: auto;
-    max-width: 200px;
-    margin: 4px auto;
-  }
-
-  .app-container[data-view='LOBBY'] .min-players-note {
-    font-size: 0.72rem;
-    margin-top: 2px;
-  }
-
-  .app-container[data-view='LOBBY'] p {
-    font-size: 0.85rem;
-    margin: 4px 0;
-  }
-
-  /* ─── GAME / WAITING landscape ─── */
-  .app-container[data-view='GAME'] .paper-content-overlay,
-  .app-container[data-view='WAITING'] .paper-content-overlay {
-    justify-content: center;
-  }
-
-  .app-container[data-view='GAME'] .game-question,
-  .app-container[data-view='WAITING'] h2 {
-    font-size: clamp(0.85rem, 2.2vh, 1.1rem);
-    margin: 0 0 4px;
-  }
-
-  .app-container[data-view='GAME'] .speech-bubble {
-    margin: 4px 0;
-    padding: 6px 8px;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .app-container[data-view='GAME'] .speech-bubble input {
-    font-size: 0.95rem;
-    padding: 4px;
-    width: 100% !important;
-  }
-
-  .app-container[data-view='GAME'] .btn-doodle,
-  .app-container[data-view='WAITING'] .btn-doodle {
+  .app-container.use-mobile-panel[data-view='LOBBY'] .btn-doodle {
     font-size: 0.85rem;
     padding: 5px 12px;
     min-height: 34px;
-    margin: 4px auto;
+    width: auto;
+    max-width: 200px;
+    margin: 4px auto 0;
+    flex-shrink: 0;
+  }
+
+  .app-container.use-mobile-panel[data-view='LOBBY'] .min-players-note {
+    font-size: 0.7rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .app-container.use-mobile-panel[data-view='LOBBY'] p {
+    font-size: 0.82rem;
+    margin: 4px 0;
+    flex-shrink: 0;
+  }
+
+  /* ─── GAME / WAITING ─── */
+  .app-container.use-mobile-panel[data-view='GAME'] .view-game,
+  .app-container.use-mobile-panel[data-view='WAITING'] .view-waiting {
+    justify-content: center;
+    gap: 4px;
+  }
+
+  .app-container.use-mobile-panel[data-view='GAME'] .game-question,
+  .app-container.use-mobile-panel[data-view='WAITING'] h2 {
+    font-size: clamp(0.85rem, 2.4vh, 1.05rem);
+    margin: 0;
+    flex-shrink: 0;
+  }
+
+  .app-container.use-mobile-panel[data-view='GAME'] .speech-bubble {
+    margin: 4px 0;
+    padding: 6px 8px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    flex-shrink: 0;
+  }
+
+  .app-container.use-mobile-panel[data-view='GAME'] .speech-bubble input {
+    font-size: 0.92rem;
+    padding: 4px;
+    width: 100% !important;
+    margin: 0;
+  }
+
+  .app-container.use-mobile-panel[data-view='GAME'] .btn-doodle,
+  .app-container.use-mobile-panel[data-view='WAITING'] .btn-doodle {
+    font-size: 0.82rem;
+    padding: 5px 12px;
+    min-height: 32px;
+    margin: 4px auto 0;
     width: auto;
     max-width: 180px;
+    flex-shrink: 0;
   }
 
-  .app-container[data-view='WAITING'] p {
-    font-size: 0.8rem;
-    margin: 4px 0;
+  .app-container.use-mobile-panel[data-view='WAITING'] p {
+    font-size: 0.78rem;
+    margin: 2px 0;
   }
 
-  /* ─── VOTING landscape ─── */
-  .app-container[data-view='VOTING'] .paper-content-overlay {
-    justify-content: flex-start;
-    padding-top: 8%;
-    height: 62%;
-  }
-
-  .app-container[data-view='VOTING'] .voting-title {
+  /* ─── VOTING ─── */
+  .app-container.use-mobile-panel[data-view='VOTING'] .voting-title {
     margin: 0 0 2px;
-    font-size: clamp(0.9rem, 2.5vh, 1.1rem);
+    font-size: clamp(0.88rem, 2.4vh, 1.05rem);
+    flex-shrink: 0;
   }
 
-  .app-container[data-view='VOTING'] .voting-question {
-    margin: 0 0 6px;
-    font-size: 0.75rem;
+  .app-container.use-mobile-panel[data-view='VOTING'] .voting-question {
+    margin: 0 0 4px;
+    font-size: 0.72rem;
     line-height: 1.15;
+    flex-shrink: 0;
   }
 
-  .app-container[data-view='VOTING'] .vote-grid {
+  .app-container.use-mobile-panel[data-view='VOTING'] .vote-grid {
+    flex: 1;
+    min-height: 0;
     gap: 4px;
     width: 100%;
-    max-height: 72%;
-    overflow: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    align-content: start;
   }
 
-  .app-container[data-view='VOTING'] .vote-grid-1 {
+  .app-container.use-mobile-panel[data-view='VOTING'] .vote-grid-1 {
     grid-template-columns: 1fr;
   }
 
-  .app-container[data-view='VOTING'] .vote-grid-2 {
+  .app-container.use-mobile-panel[data-view='VOTING'] .vote-grid-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .app-container[data-view='VOTING'] .vote-grid-3 {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  .app-container.use-mobile-panel[data-view='VOTING'] .vote-grid-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .app-container[data-view='VOTING'] .vote-card {
+  .app-container.use-mobile-panel[data-view='VOTING'] .vote-card {
     padding: 4px 6px;
     margin: 0;
     min-height: 0;
-    font-size: 0.72rem;
+    font-size: 0.7rem;
   }
 
-  .app-container[data-view='VOTING'] .vote-answer-text {
-    font-size: 0.72rem;
+  .app-container.use-mobile-panel[data-view='VOTING'] .vote-answer-text {
+    font-size: 0.7rem;
     line-height: 1.1;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -544,96 +569,95 @@ body.dark-mode .vote-results-mobile {
     overflow: hidden;
   }
 
-  .app-container[data-view='VOTING'] .vote-avatar {
-    width: 18px;
-    height: 18px;
-    margin-right: 4px;
+  .app-container.use-mobile-panel[data-view='VOTING'] .vote-avatar {
+    width: 16px;
+    height: 16px;
+    margin-right: 3px;
   }
 
-  .app-container[data-view='VOTING'] .vote-card strong {
-    font-size: 0.72rem;
+  .app-container.use-mobile-panel[data-view='VOTING'] .vote-card strong {
+    font-size: 0.7rem;
   }
 
-  .app-container[data-view='VOTING'] .vote-hint {
-    font-size: 0.6rem;
+  .app-container.use-mobile-panel[data-view='VOTING'] .vote-hint {
+    font-size: 0.58rem;
   }
 
-  .app-container[data-view='VOTING'] .vote-grid-3 .vote-card:nth-child(6):last-child,
-  .app-container[data-view='VOTING'] .vote-grid-3 .vote-card:nth-child(6):nth-last-child(2),
-  .app-container[data-view='VOTING'] .vote-grid-3 .vote-card:nth-child(7):last-child {
-    grid-column: auto;
-  }
-
-  /* ─── RESULT landscape ─── */
-  .app-container[data-view='RESULT'] .paper-content-overlay {
-    justify-content: flex-start;
-    padding-top: 6%;
+  /* ─── RESULT ─── */
+  .app-container.use-mobile-panel[data-view='RESULT'] .view-result {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    gap: 2px;
   }
 
-  .app-container[data-view='RESULT'] h1 {
-    font-size: clamp(0.95rem, 3vh, 1.25rem) !important;
-    margin: 0 0 4px;
+  .app-container.use-mobile-panel[data-view='RESULT'] h1 {
+    font-size: clamp(0.9rem, 2.8vh, 1.15rem) !important;
+    margin: 0;
     line-height: 1.15;
   }
 
-  .app-container[data-view='RESULT'] p {
-    font-size: 0.75rem;
-    margin: 2px 0;
-  }
-
-  .app-container[data-view='RESULT'] .result-impostor-name {
-    font-size: clamp(0.9rem, 3vh, 1.2rem);
-  }
-
-  .app-container[data-view='RESULT'] .result-question {
-    font-size: 0.8rem;
-  }
-
-  .app-container[data-view='RESULT'] hr {
-    margin: 6px 0 !important;
-  }
-
-  .app-container[data-view='RESULT'] .vote-results-mobile {
-    margin-top: 6px;
-    padding: 6px 8px;
+  .app-container.use-mobile-panel[data-view='RESULT'] p {
     font-size: 0.72rem;
+    margin: 1px 0;
   }
 
-  .app-container[data-view='RESULT'] .vote-results-mobile h3 {
-    font-size: 0.8rem;
+  .app-container.use-mobile-panel[data-view='RESULT'] .result-impostor-name {
+    font-size: clamp(0.85rem, 2.8vh, 1.1rem);
   }
 
-  .app-container[data-view='RESULT'] .result-action-row {
+  .app-container.use-mobile-panel[data-view='RESULT'] .result-question {
+    font-size: 0.75rem;
+  }
+
+  .app-container.use-mobile-panel[data-view='RESULT'] hr {
+    margin: 4px 0 !important;
+    width: 100%;
+  }
+
+  .app-container.use-mobile-panel[data-view='RESULT'] .vote-results-mobile {
+    margin-top: 4px;
+    padding: 5px 8px;
+    font-size: 0.68rem;
+    max-width: 100%;
+  }
+
+  .app-container.use-mobile-panel[data-view='RESULT'] .vote-results-mobile h3 {
+    font-size: 0.75rem;
+  }
+
+  .app-container.use-mobile-panel[data-view='RESULT'] .result-action-row {
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
     gap: 6px;
-    margin-top: 6px;
+    margin-top: 4px;
+    flex-shrink: 0;
   }
 
-  .app-container[data-view='RESULT'] .btn-compact {
-    font-size: 0.75rem;
+  .app-container.use-mobile-panel[data-view='RESULT'] .btn-compact {
+    font-size: 0.72rem;
     padding: 4px 8px;
-    min-height: 32px;
+    min-height: 30px;
     width: auto;
     max-width: none;
     margin: 0;
   }
 
   /* ─── CREDITS landscape ─── */
-  .app-container[data-view='CREDITS'] .paper-content-overlay {
-    justify-content: flex-start;
+  .app-container.use-mobile-panel[data-view='CREDITS'] .view-credits {
     overflow-y: auto;
-    font-size: 0.8rem;
+    -webkit-overflow-scrolling: touch;
+    font-size: 0.78rem;
+    text-align: left;
   }
 
-  .app-container[data-view='CREDITS'] h1 {
-    font-size: 1.2rem;
+  .app-container.use-mobile-panel[data-view='CREDITS'] .view-credits h1 {
+    font-size: 1.1rem;
+    text-align: center;
+    width: 100%;
   }
 
-  /* Touch kick */
+  /* Touch kick buttons */
   @media (hover: none) and (pointer: coarse) {
     .kick-overlay-btn {
       opacity: 0.45;
@@ -647,14 +671,20 @@ body.dark-mode .vote-results-mobile {
   }
 }
 
-/* Very short landscape (e.g. iPhone SE) */
+/* Wide landscape phones: 3-column voting */
+@media (max-width: 950px) and (orientation: landscape) and (min-width: 700px) {
+  .app-container.use-mobile-panel[data-view='VOTING'] .vote-grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Very short landscape */
 @media (max-height: 380px) and (orientation: landscape) {
-  .paper-content-overlay {
-    width: 66% !important;
-    height: 64% !important;
+  .app-container.use-mobile-panel .mobile-hud {
+    min-height: 28px;
   }
 
-  .app-container[data-view='VOTING'] .vote-grid-3 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .app-container.use-mobile-panel .mobile-panel-content {
+    padding: 4px 8px;
   }
 }

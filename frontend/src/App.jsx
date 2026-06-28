@@ -442,23 +442,67 @@ function GameApp() {
       : 'kick-ui-compact';
 
   const showRotatePrompt = isMobile && isPortrait && GAMEPLAY_VIEWS.has(view);
+  const useMobilePanel = isMobile || isLandscapePhone;
+  const showMobileHud = useMobilePanel && !showRotatePrompt;
+
+  const handleBack = view === 'CREDITS' ? () => changeView('HOME') : leaveGame;
 
   return (
     <div
-      className={`app-container${isLandscapePhone ? ' is-landscape-phone' : ''}${isMobile ? ' is-mobile' : ''}`}
+      className={`app-container${isLandscapePhone ? ' is-landscape-phone' : ''}${isMobile ? ' is-mobile' : ''}${useMobilePanel ? ' use-mobile-panel' : ''}`}
       data-view={view}
     >
 
       {showRotatePrompt && <RotatePrompt />}
 
-      <div className={`settings-toolbar${showRotatePrompt ? ' behind-rotate' : ''}`}>
-        <ThemeToggle isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
-        <AnimToggle
-          showAnimations={showAnimations}
-          toggleAnimations={toggleAnimations}
-        />
-        <LangToggle />
-      </div>
+      {showMobileHud ? (
+        <header className="mobile-hud">
+          {view !== 'HOME' ? (
+            <button
+              type="button"
+              className="mobile-hud-back"
+              onClick={handleBack}
+              title={view === 'CREDITS' ? t('credits.back') : t('lobby.leaveGame')}
+              aria-label={view === 'CREDITS' ? t('credits.back') : t('lobby.leaveGame')}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 12H5" />
+                <path d="M12 19l-7-7 7-7" />
+              </svg>
+            </button>
+          ) : (
+            <span className="mobile-hud-back mobile-hud-back--spacer" aria-hidden="true" />
+          )}
+
+          <div className="mobile-hud-center">
+            {view === 'LOBBY' && (
+              <span className="mobile-hud-room">
+                {t('lobby.roomLabel')} {roomCode === '...' ? t('lobby.loading') : roomCode}
+              </span>
+            )}
+            {(view === 'GAME' || view === 'WAITING') && (
+              <span className="mobile-hud-status">
+                {t('game.readyCounter', { x: submittedCount, total: players.length })}
+              </span>
+            )}
+          </div>
+
+          <div className="mobile-hud-settings">
+            <ThemeToggle isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
+            <AnimToggle showAnimations={showAnimations} toggleAnimations={toggleAnimations} />
+            <LangToggle />
+          </div>
+        </header>
+      ) : (
+        <div className={`settings-toolbar${showRotatePrompt ? ' behind-rotate' : ''}`}>
+          <ThemeToggle isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
+          <AnimToggle
+            showAnimations={showAnimations}
+            toggleAnimations={toggleAnimations}
+          />
+          <LangToggle />
+        </div>
+      )}
       <aside className={`vote-side-drawer ${view === 'RESULT' && lastVoteBreakdown.length > 0 ? 'visible' : ''}`}>
         <h3>{t('result.voteResults')}</h3>
         {lastVoteBreakdown.map((entry) => (
@@ -474,11 +518,11 @@ function GameApp() {
         alt="She Maimuno title"
         className={`title-img ${view !== 'HOME' ? 'hidden' : ''}`}
       />
-      <div className={`paper-wrapper ${view !== 'HOME' ? 'expanded' : ''}`} data-view={view}>
-        <PaperBoard view={view} showAnimations={showAnimations} isMobileLite={isMobile || isLandscapePhone}>
+      <div className={`paper-wrapper ${!useMobilePanel && view !== 'HOME' ? 'expanded' : ''}`} data-view={view}>
+        <PaperBoard view={view} showAnimations={showAnimations} isMobileLite={useMobilePanel}>
 
           {view === 'HOME' && (
-            <>
+            <div className="view-panel view-home">
               <input placeholder={t('home.namePlaceholder')} value={name} onChange={e => setName(e.target.value)} />
 
               {urlRoomCode ? (
@@ -499,12 +543,12 @@ function GameApp() {
                   {t('home.credits')}
                 </span>
               </div>
-            </>
+            </div>
           )}
 
-          {view !== 'HOME' && (
+          {!useMobilePanel && view !== 'HOME' && (
             <div
-              onClick={view === 'CREDITS' ? () => changeView('HOME') : leaveGame}
+              onClick={handleBack}
               className="leave-game-btn"
               onMouseEnter={e => e.currentTarget.style.opacity = 1}
               onMouseLeave={e => e.currentTarget.style.opacity = 0.6}
@@ -518,8 +562,10 @@ function GameApp() {
           )}
 
           {view === 'LOBBY' && (
-            <>
-              <h2>{t('lobby.roomLabel')} {roomCode === '...' ? <span style={{ opacity: 0.5 }}>{t('lobby.loading')}</span> : roomCode}</h2>
+            <div className="view-panel view-lobby">
+              {!useMobilePanel && (
+                <h2>{t('lobby.roomLabel')} {roomCode === '...' ? <span style={{ opacity: 0.5 }}>{t('lobby.loading')}</span> : roomCode}</h2>
+              )}
 
               <button className="btn-link" onClick={copyInvite}>{t('lobby.copyInvite')}</button>
 
@@ -572,15 +618,16 @@ function GameApp() {
               ) : (
                 <p>{t('lobby.waitingForHost')}</p>
               )}
-              <br />
-            </>
+            </div>
           )}
 
           {view === 'GAME' && (
-            <>
-              <div className="ready-counter">
-                {t('game.readyCounter', { x: submittedCount, total: players.length })}
-              </div>
+            <div className="view-panel view-game">
+              {!useMobilePanel && (
+                <div className="ready-counter">
+                  {t('game.readyCounter', { x: submittedCount, total: players.length })}
+                </div>
+              )}
 
               <h2 className="game-question">{roundQuestionText}</h2>
 
@@ -612,11 +659,11 @@ function GameApp() {
                   </button>
                 </div>
               )}
-            </>
+            </div>
           )}
 
           {view === 'WAITING' && (
-            <>
+            <div className="view-panel view-waiting">
               <h2>{t('waiting.answerReceived')} 🍌</h2>
               <p>{t('waiting.waitForAll')}</p>
               <div style={{ marginTop: '20px', fontSize: '1.1rem', opacity: 0.8 }}>
@@ -625,11 +672,11 @@ function GameApp() {
               <button className="btn-doodle btn-secondary" style={{ marginTop: '16px' }} onClick={handleEdit}>
                 {t('waiting.editAnswer')}
               </button>
-            </>
+            </div>
           )}
 
           {view === 'VOTING' && (
-            <>
+            <div className="view-panel view-voting">
               <h2 className="voting-title">{t('voting.title')}</h2>
               {votingQuestionText && <p className="voting-question">"{votingQuestionText}"</p>}
               {!hasVoted ? (
@@ -659,11 +706,11 @@ function GameApp() {
                   ))}
                 </div>
               ) : <h2>{t('voting.voteRecorded')} 🍌</h2>}
-            </>
+            </div>
           )}
 
           {view === 'RESULT' && result && (
-            <>
+            <div className="view-panel view-result">
               <h1 style={{ color: (myRole === 'IMPOSTOR' ? !result.impostorCaught : result.impostorCaught) ? 'var(--leaf)' : 'var(--red)' }}>
                 {myRole === 'IMPOSTOR'
                   ? (result.impostorCaught ? t('result.youGotCaught') : t('result.youRanAway'))
@@ -695,10 +742,10 @@ function GameApp() {
                   </button>
                 </div>
               )}
-            </>
+            </div>
           )}
           {view === 'CREDITS' && (
-            <>
+            <div className="view-panel view-credits">
               <h1>{t('credits.title')}</h1>
               <div style={{ textAlign: 'left', margin: '0 auto', maxWidth: '400px', lineHeight: '1.2' }}>
 
@@ -714,7 +761,7 @@ function GameApp() {
                   <a href="https://www.vecteezy.com/free-videos/abstract" style={{ color: "black" }} target='_blank' rel="noreferrer">Abstract Stock Videos by Vecteezy</a>
                 </p>
               </div>
-            </>
+            </div>
           )}
 
         </PaperBoard>
