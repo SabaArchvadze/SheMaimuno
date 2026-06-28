@@ -87,16 +87,6 @@ export default function PaperBoard({ children, view, showAnimations, isMobileLit
     if (mobileFadeTimerRef.current) clearTimeout(mobileFadeTimerRef.current);
   }, []);
 
-  if (isMobileLite) {
-    return (
-      <div className="mobile-game-panel" data-view={view}>
-        <div className={`mobile-panel-content${mobileFading ? ' mobile-panel-fade' : ''}`}>
-          {displayContent}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div
       className={`paper-board-container ${animState.toLowerCase()} ${!usePaperVideo ? 'simple-mode' : ''}`}
@@ -120,7 +110,7 @@ export default function PaperBoard({ children, view, showAnimations, isMobileLit
         />
       )}
 
-      <div className={`paper-content-overlay ${animState !== 'STATIC' ? 'hidden' : ''}`}>
+      <div className={`paper-content-overlay ${animState !== 'STATIC' ? 'hidden' : ''}${mobileFading ? ' mobile-fade' : ''}`}>
         {displayContent}
       </div>
     </div>

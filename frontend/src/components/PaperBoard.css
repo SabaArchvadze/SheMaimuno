@@ -46,6 +46,12 @@
   pointer-events: none;
 }
 
+/* Quick cross-fade used on mobile instead of full video crumple */
+.paper-content-overlay.mobile-fade {
+  opacity: 0.25;
+  transition: opacity 0.1s ease;
+}
+
 
 .paper-board-container.crumpling {
   animation: natural-throw 1.5s forwards; 

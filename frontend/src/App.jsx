@@ -510,7 +510,7 @@ function GameApp() {
               </button>
             )}
             <ThemeToggle isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
-            <AnimToggle showAnimations={showAnimations} toggleAnimations={toggleAnimations} compact />
+            <AnimToggle showAnimations={showAnimations} toggleAnimations={toggleAnimations} />
             <LangToggle />
           </div>
         </header>
