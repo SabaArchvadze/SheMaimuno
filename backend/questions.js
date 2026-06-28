@@ -178,6 +178,77 @@ const RAW_QUESTIONS = [
     "id": 32,
     ka: { normal: "რომელი ემოჯი გამოიყენე ბოლოს?", impostor: "რა ემოჯს არ იყენებ არასდროს?"},
     en: { normal: "Which emoji did you use last?", impostor: "Which emoji do you never use?"},
+  },
+  
+  {
+  id: 33,
+  ka: { normal: "რომელ ერთ ნივთს წაიღებდი კუნძულზე?", impostor: "რომელი ნივთის დაკარგვა გაგიტყდებოდა ყველაზე მეტად?" },
+  en: { normal: "Which item would you take to a deserted island?", impostor: "Which item would hurt the most to lose?" },
+  },
+  {
+  id: 34,
+  ka: { normal: "რომელი საჭმელი უნდა აიკრძალოს სამუდამოდ?", impostor: "რომელ საჭმელს შეჭამდი ყოველდღე ერთი თვის განმავლობაში?" },
+  en: { normal: "Which food should be banned forever?", impostor: "Which food would you eat every day for a month?" },
+  },
+  {
+  id: 43,
+  ka: { normal: "რა არის ყველაზე ცუდი საჩუქარი დაბადების დღეზე?", impostor: "რა არის ყველაზე კარგი საჩუქარი დაბადების დღეზე?" },
+  en: { normal: "What is the worst birthday gift?", impostor: "What is the best birthday gift?" },
+  },
+  {
+  id: 44,
+  ka: { normal: "რომელ კლასიკურ ზღაპარში იცხოვრებდი?", impostor: "რომელი ზღაპარი გაშინებდა ბავშვობაში?" },
+  en: { normal: "Which classic fairy tale would you live in?", impostor: "Which fairy tale scared you as a child?" },
+  },
+  {
+  id: 45,
+  ka: { normal: "რამდენ საათს გაძლებდი ტელეფონის გარეშე?", impostor: "რამდენ საათს გაძლებდი ლაპარაკის გარეშე?" },
+  en: { normal: "How many hours would you last without your phone?", impostor: "How many hours would you last without talking?" },
+  },
+  {
+  id: 51,
+  ka: { normal: "რომელი თამაში გააფუჭა ზედმეტმა პოპულარობამ?", impostor: "რომელი თამაში იმსახურებს ბევრად მეტ პოპულარობას?" },
+  en: { normal: "Which game was ruined by too much popularity?", impostor: "Which game deserves much more popularity?" },
+  },
+  {
+  id: 54,
+  ka: { normal: "რომელ მსახიობს მოუხდებოდა ბოროტმოქმედის როლი?", impostor: "რომელ მსახიობს მოუხდებოდა სუპერგმირის როლი?" },
+  en: { normal: "Which actor would fit a villain role?", impostor: "Which actor would fit a superhero role?" },
+  },
+  {
+  id: 56,
+  ka: { normal: "რამდენ წუთში მოემზადები სახლიდან გასასვლელად?", impostor: "დაწერე რიცხვი 1-120 მდე." },
+  en: { normal: "How many minutes do you need to get ready to leave the house?", impostor: "Write a number between 1 and 120." },
+  },
+  {
+  id: 59,
+  ka: { normal: "რომელი სპორტი უნდა იყოს უფრო პოპულარული?", impostor: "რომელი სპორტი გგონია ზედმეტად პოპულარული?" },
+  en: { normal: "Which sport should be more popular?", impostor: "Which sport do you think is too popular?" },
+  },
+  {
+  id: 60,
+  ka: { normal: "რომელ ნივთს იყიდდი, ფული პრობლემა რომ არ იყოს?", impostor: "რომელ ძვირიან ნივთს არასდროს იყიდდი?" },
+  en: { normal: "Which item would you buy if money was not a problem?", impostor: "Which expensive item would you never buy?" },
+  },
+  {
+  id: 71,
+  ka: { normal: "რომელ ეპოქაში იცხოვრებდი ერთი წლით?", impostor: "რომელ ეპოქაში ცხოვრება იქნებოდა ყველაზე საშინელი?" },
+  en: { normal: "Which era would you live in for one year?", impostor: "Which era would be the worst to live in?" },
+  },
+  {
+  id: 78,
+  ka: { normal: "რომელი საჭმელი ჯობია ცივი?", impostor: "რომელი საჭმელი არ იჭმევა ცივი?" },
+  en: { normal: "Which food is better cold?", impostor: "Which food cannot be eaten cold?" },
+  },
+  {
+  id: 79,
+  ka: { normal: "რომელი ცნობილი ფრაზა გიშლის ნერვებს?", impostor: "რომელ ცნობილ ფრაზას იყენებ ხშირად?" },
+  en: { normal: "Which famous phrase annoys you?", impostor: "Which famous phrase do you use often?" },
+  },
+  {
+  id: 81,
+  ka: { normal: "რომელ მუსიკალურ ჟანრს უსმენ ყველაზე ხშირად?", impostor: "რომელ მუსიკალურ ჟანრს ვერ უსმენ საერთოდ?" },
+  en: { normal: "Which music genre do you listen to the most?", impostor: "Which music genre can you not listen to at all?" },
   }
 ];
 

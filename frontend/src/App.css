@@ -660,12 +660,24 @@ button {
 
 .monkey-wrapper {
   position: fixed;
-  bottom: 20px;
+  bottom: calc(20px + var(--monkey-depth, 0px) + var(--monkey-jump, 0px));
   width: 60px;
   height: 90px;
   z-index: -1;
   pointer-events: none;
   transition: bottom 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* On mobile, monkeys roam the desk at screen bottom, BEHIND the paper
+   (the paper sits on a higher z-layer) so they never clutter the page. */
+.monkey-wrapper.above-all {
+  bottom: calc(
+    var(--monkey-base-bottom, 52px) +
+    var(--monkey-depth, 0px) +
+    var(--monkey-jump, 0px)
+  );
+  z-index: 1;
+  pointer-events: none;
 }
 
 .monkey-svg {

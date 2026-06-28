@@ -27,6 +27,9 @@ export const STRINGS = {
     ui: {
       animations: 'ანიმაციები',
       animShort: 'ანიმ',
+      theme: 'თემა',
+      fullscreen: 'სრული ეკრანი',
+      exitFullscreen: 'ეკრანის დაპატარავება',
     },
     mobile: {
       rotateTitle: 'შეატრიალე ტელეფონი',
@@ -117,6 +120,9 @@ export const STRINGS = {
     ui: {
       animations: 'Animations',
       animShort: 'Anim',
+      theme: 'Theme',
+      fullscreen: 'Fullscreen',
+      exitFullscreen: 'Exit Fullscreen',
     },
     mobile: {
       rotateTitle: 'Rotate your phone',

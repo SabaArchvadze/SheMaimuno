@@ -1,0 +1,169 @@
+.settings-panel {
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* ── Cog button ─────────────────────────────────────── */
+.settings-panel__cog {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.88);
+  border: 2px dashed var(--ink);
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--ink);
+  padding: 0;
+  opacity: 0.9;
+  touch-action: manipulation;
+  transition: transform 0.2s ease, opacity 0.15s;
+}
+
+.settings-panel__cog:active {
+  transform: rotate(60deg) scale(0.9);
+  opacity: 1;
+}
+
+.settings-panel__cog.is-open {
+  background: var(--banana);
+  opacity: 1;
+  border-style: solid;
+}
+
+body.dark-mode .settings-panel__cog {
+  background: rgba(40, 40, 40, 0.92);
+}
+
+body.dark-mode .settings-panel__cog.is-open {
+  background: rgba(255, 225, 53, 0.3);
+}
+
+/* ── Dropdown panel ─────────────────────────────────── */
+.settings-panel__dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 20000;
+
+  background-color: var(--paper);
+
+  border: 2.5px solid var(--ink);
+  border-radius: 16px 4px 14px 4px / 4px 14px 4px 16px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 215px;
+  box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.14);
+
+  animation: panel-drop 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  transform-origin: top right;
+}
+
+@keyframes panel-drop {
+  0%   { opacity: 0; transform: scale(0.85) translateY(-6px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ── Rows inside dropdown ───────────────────────────── */
+.settings-panel__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.settings-panel__label {
+  font-family: 'Mandys Sketch', cursive;
+  font-size: 0.95rem;
+  color: var(--ink);
+  opacity: 0.8;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Controls keep their natural size, never shrink in the row */
+.settings-panel__row > .doodle-switch,
+.settings-panel__row > .anim-toggle-container,
+.settings-panel__row > .lang-toggle {
+  flex-shrink: 0;
+}
+
+/* Scale the theme switch up uniformly (keeps knob alignment intact) */
+.settings-panel__row > .doodle-switch {
+  transform: scale(1.15);
+  transform-origin: right center;
+}
+
+/* The language row spans the full width */
+.settings-panel__row > .lang-toggle {
+  width: 100%;
+  justify-content: center;
+}
+
+/* Inside the panel the animations toggle is just a bare checkbox:
+   no second box, no duplicate "anim" label (the row label covers it). */
+.settings-panel__row > .anim-toggle-container {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0;
+  min-height: 0;
+}
+
+.settings-panel__row > .anim-toggle-container:hover {
+  animation: none;
+  transform: none;
+  background: none !important;
+}
+
+.settings-panel__row > .anim-toggle-container .anim-label {
+  display: none;
+}
+
+.settings-panel__row > .anim-toggle-container .anim-checkbox {
+  width: 26px;
+  height: 26px;
+}
+
+/* ── Fullscreen button ──────────────────────────────── */
+.settings-panel__fullscreen {
+  width: 100%;
+  font-family: 'Mandys Sketch', cursive;
+  font-size: 0.88rem;
+  font-weight: bold;
+  background: rgba(0, 0, 0, 0.06);
+  border: 2px solid var(--ink);
+  border-radius: 255px 8px 225px 8px / 8px 225px 8px 255px;
+  padding: 7px 12px;
+  cursor: pointer;
+  color: var(--ink);
+  touch-action: manipulation;
+  transition: background 0.15s, transform 0.1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.settings-panel__fullscreen:active {
+  transform: scale(0.96);
+  background: rgba(0, 0, 0, 0.12);
+}
+
+body.dark-mode .settings-panel__fullscreen {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+/* Divider between sections */
+.settings-panel__divider {
+  height: 1px;
+  background: rgba(0, 0, 0, 0.12);
+  margin: -2px 0;
+}
+
+body.dark-mode .settings-panel__divider {
+  background: rgba(255, 255, 255, 0.1);
+}

@@ -61,7 +61,7 @@ const POSES = {
   }
 };
 
-function SingleMonkey({ view, winState, headSrc, initialPos, sizeScale, depthOffset, showAnimations }) {
+function SingleMonkey({ view, winState, headSrc, initialPos, sizeScale, depthOffset, showAnimations, aboveAll }) {
 
   const [pos, setPos] = useState(initialPos);
   const [direction, setDirection] = useState(Math.random() > 0.5 ? 1 : -1);
@@ -216,21 +216,23 @@ function SingleMonkey({ view, winState, headSrc, initialPos, sizeScale, depthOff
   }, [frame, poseKey]);
 
   const currentPath = POSES[poseKey];
-  const width = 50 * sizeScale;
-  const height = 90 * sizeScale;
+  const scaleFactor = aboveAll ? 0.62 : 1;
+  const width = 50 * sizeScale * scaleFactor;
+  const height = 90 * sizeScale * scaleFactor;
 
   if (!showAnimations) return null;
 
   return (
     <div
-      className="monkey-wrapper"
+      className={`monkey-wrapper${aboveAll ? ' above-all' : ''}`}
       style={{
         left: `${pos}%`,
-        bottom: 20 + depthOffset + offsetY,
+        '--monkey-depth': `${aboveAll ? depthOffset * 0.35 : depthOffset}px`,
+        '--monkey-jump': `${offsetY}px`,
         width: width,
         height: height,
         transform: `scaleX(${direction})`,
-        zIndex: -1,
+        zIndex: aboveAll ? 1 : -1,
       }}
     >
       <svg className="monkey-svg" viewBox="0 0 50 90">
@@ -257,7 +259,7 @@ function SingleMonkey({ view, winState, headSrc, initialPos, sizeScale, depthOff
   );
 }
 
-export default function DoodleMonkey({ view, winState, showAnimations, hiddenOnMobile = false }) {
+export default function DoodleMonkey({ view, winState, showAnimations, aboveAll = false }) {
   const monkeys = useMemo(() => {
     const troop = [];
     for (let i = 0; i < 5; i++) {
@@ -278,14 +280,10 @@ export default function DoodleMonkey({ view, winState, showAnimations, hiddenOnM
     return troop.sort((a, b) => b.depthOffset - a.depthOffset);
   }, []);
 
-  if (hiddenOnMobile) {
-    return null;
-  }
-
   return (
     <>
       {monkeys.map(m => (
-        <SingleMonkey key={m.id} view={view} winState={winState} headSrc={m.headSrc} initialPos={m.initialPos} sizeScale={m.sizeScale} depthOffset={m.depthOffset} showAnimations={showAnimations} />
+        <SingleMonkey key={m.id} view={view} winState={winState} headSrc={m.headSrc} initialPos={m.initialPos} sizeScale={m.sizeScale} depthOffset={m.depthOffset} showAnimations={showAnimations} aboveAll={aboveAll} />
       ))}
     </>
   );
